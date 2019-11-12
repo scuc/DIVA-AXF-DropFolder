@@ -36,10 +36,6 @@ def create_mdf():
                 fpath = fpmod.check_pathname(dpath)
 
                 for root, dirs, files in os.walk(dpath): 
-                    # for name in dirs:   
-                    #     dpath = os.path.join(root, name)
-                    #     dpath = dpath + "\\"
-                    #     append_pathlist(dpath, pathslist)
 
                     for name in files: 
                         fpath = os.path.join(root,name)
@@ -48,6 +44,14 @@ def create_mdf():
                             print(f"REMOVING:    {fpath}")
                         else:
                             append_pathlist(fpath, pathslist)
+
+                    for name in dirs:
+                        dpath = os.path.join(root, name)
+                        dpath = dpath + "/"
+                        if os.listdir(dpath) == []:
+                            append_pathlist(dpath, pathslist)
+                        else:
+                            pass
 
                 paths_string = '\n'.join(map(str, pathslist))
                 print(paths_string)
