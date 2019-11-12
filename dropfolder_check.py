@@ -14,6 +14,8 @@ archive_f = config['paths']['archive_dropfolder']
 drop_f = config['paths']['mac_dropfolder']
 divaname = config['paths']['DIVAName']
 
+logger = logging.getLogger(__name__)
+
 
 def create_mdf(): 
     """
@@ -25,50 +27,42 @@ def create_mdf():
     """
 
     dlist = [d for d in os.listdir(
-        drop_f) if os.path.isdir(os.path.join(drop_f, d))]
-    
-    print(dlist)
+        drop_f) if os.path.isdir(os.path.join(drop_f, d)) and 
+        d != "_archiving"]
+
+    dlist_msg = f"New directories for DMF archiving: {dlist}")
+    logger.info(dlist_msg)
+
+    movelist = []
 
     if len(dlist) != 0: 
         for d in dlist: 
             mdf_doc = d + '.mdf'
+            count=0
             if os.path.exists(os.path.join(archive_f,mdf_doc)):
                 dlist.remove(d)
-                print("----------EXISTS------------")
+                fileexist_msg = f"{mdf_doc} already exists in the archive folder, skipping"
+                logger.info(fileexist_msg)
                 continue
             else: 
-                pathslist = []
                 dpath = os.path.join(drop_f,d)
-                # fpath = fpmod.check_pathname(dpath)
+                fpath = fpmod.check_pathname(dpath)
 
                 for root, dirs, files in os.walk(dpath): 
-
                     for name in files: 
                         fpath = os.path.join(root,name)
-                        print(f"FPATH:    {fpath}")
                         if fpath.endswith('.DS_Store'):
                             os.remove(fpath)
-                            print(f"REMOVING:    {fpath}")
+                            count += 1
                         else:
-                            # append_pathlist(fpath, pathslist)
                             pass
-                    
-                    # for name in dirs:
-                    #     dpath = os.path.join(root, name)
-                    #     dpath = dpath + "/"
-                    #     if os.listdir(dpath) == []:
-                    #         append_pathlist(dpath, pathslist)
-                    #     else:
-                    #         pass
+                    rm_msg = f"{count} .DS_Store files removed from dir before archive."
+                    logger.info(rm_msg)
 
                 # paths_string = '\n'.join(map(str, pathslist))
                 paths_string = f"{d}/*"
-                print(paths_string)
+
                 os.chdir(drop_f)
-                
-                print("")
-                print("*"*30)
-                print("")
 
                 with open(mdf_doc, mode="w", encoding='utf-8-sig') as mdf_doc:
 
@@ -95,18 +89,37 @@ def create_mdf():
 
                     mdf_doc.write(doc_body)
                     mdf_doc.close()
-                    shutil.move()
+                    movelist.extend([dpath, os.path.join(drop_f, d + ".mdf")])
+                    new_mdf_msg = f"New .mdf file created: {d + '.mdf'}"
+                    logger.info(new_mdf_msg)
+                    dir_delim_msg=f"\n 
+                                {'-'*60} \n 
+                                \n"
+                    logger.info(dir_delim_msg)
+    print(f"MOVE LIST: {movelist}")
+    move_to_checkin(movelist)
 
 
-def append_pathlist(path, pathslist):
+def move_to_checkin(movelist):
     """
-    Build the list of files / folders and change any forward slashes to back slashes. 
+    Move files and dir in the movelist from the drop folder to the archive location.
     """
+    
+    for x in movelist:
+        arch_check = os.path.basename(x)
+        try:
+            if os.path.exists(os.path.join(archive_f, arch_check)): 
+                print(f"{arch_check} already exists in this location, skipping")
+                pass
+            else:
+                shutil.move(x, archive_f)
+        except Exception as e:
+            move_excp_msg = f"\n\
+            Exception raised on moving {x}.\n\
+            Error Message:  {str(e)} \n\
+            "
 
-    bk_path = re.sub(r'/', r'\\', path)
-    pathslist.append(bk_path[51:])
-
-    return pathslist
+    return
 
 
 if __name__ == '__main__':
