@@ -1,14 +1,17 @@
 #! /usr/bin/env python3
 
+import logging
 import os
 import re
+import shutil
 
 import config
 import filepath_mods as fpmod
 
 
 config = config.get_config()
-df = config['paths']['mac_dropfolder']
+archive_f = config['paths']['archive_dropfolder']
+drop_f = config['paths']['mac_dropfolder']
 divaname = config['paths']['DIVAName']
 
 
@@ -22,40 +25,46 @@ def create_mdf():
     """
 
     dlist = [d for d in os.listdir(
-        df) if os.path.isdir(os.path.join(df, d))]
+        drop_f) if os.path.isdir(os.path.join(drop_f, d))]
+    
+    print(dlist)
 
     if len(dlist) != 0: 
         for d in dlist: 
             mdf_doc = d + '.mdf'
-            if os.path.exists(os.path.join(df,mdf_doc)): 
+            if os.path.exists(os.path.join(archive_f,mdf_doc)):
+                dlist.remove(d)
                 print("----------EXISTS------------")
                 continue
             else: 
                 pathslist = []
-                dpath = os.path.join(df,d)
-                fpath = fpmod.check_pathname(dpath)
+                dpath = os.path.join(drop_f,d)
+                # fpath = fpmod.check_pathname(dpath)
 
                 for root, dirs, files in os.walk(dpath): 
 
                     for name in files: 
                         fpath = os.path.join(root,name)
+                        print(f"FPATH:    {fpath}")
                         if fpath.endswith('.DS_Store'):
                             os.remove(fpath)
                             print(f"REMOVING:    {fpath}")
                         else:
-                            append_pathlist(fpath, pathslist)
-
-                    for name in dirs:
-                        dpath = os.path.join(root, name)
-                        dpath = dpath + "/"
-                        if os.listdir(dpath) == []:
-                            append_pathlist(dpath, pathslist)
-                        else:
+                            # append_pathlist(fpath, pathslist)
                             pass
+                    
+                    # for name in dirs:
+                    #     dpath = os.path.join(root, name)
+                    #     dpath = dpath + "/"
+                    #     if os.listdir(dpath) == []:
+                    #         append_pathlist(dpath, pathslist)
+                    #     else:
+                    #         pass
 
-                paths_string = '\n'.join(map(str, pathslist))
+                # paths_string = '\n'.join(map(str, pathslist))
+                paths_string = f"{d}/*"
                 print(paths_string)
-                os.chdir(df)
+                os.chdir(drop_f)
                 
                 print("")
                 print("*"*30)
@@ -77,7 +86,7 @@ def create_mdf():
                                 f"</comments>\n"
                                 f"\n"
                                 f"#sourceDestinationDIVAName={divaname}\n"
-                                f"#sourceDestinationDIVAPath={df}\n"
+                                f"#sourceDestinationDIVAPath={drop_f}\n"
                                 f"\n"
                                 f"<fileList>\n"
                                 f"{paths_string}\n"
@@ -86,6 +95,7 @@ def create_mdf():
 
                     mdf_doc.write(doc_body)
                     mdf_doc.close()
+                    shutil.move()
 
 
 def append_pathlist(path, pathslist):
