@@ -1,43 +1,43 @@
 #! /usr/bin/env python3
 
+import logging
 import os
 import re
 
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def check_pathname(path):
     """
     Check each path recursively, and elminiate any illegal characters.
     """
-
+    count = 0
     for root, dirs, files in os.walk(path):
-
         for name in dirs: 
             pathname = os.path.join(root, name)
-            print(f"     DIR NAME:   {pathname}")
             safe_pathname = makeSafeName(pathname)
-            print(f"SAFE DIR NAME:   {safe_pathname}")
-            print("")
 
         for name in files:
             pathname = os.path.join(root, name)
-            print(f"     FILE NAME:  {pathname}")
             if pathname.endswith(".DS_Store"):
                 os.remove(pathname)
+                count += 1
                 continue
             else:
                 safe_pathname = makeSafeName(pathname)
-                print(f"SAFE FILE NAME:   {safe_pathname}")
-            print("-"*30)
-    
+                
+    rm_msg = f"{count} .DS_Store files removed from dir before archive."
+    logger.info(rm_msg)
     return 
+
 
 def makeSafeName(pathname):
     """
     Check a path name against a list of illegal characters, remove any found. 
     """
-
+    print(f"PATHNAME:    {pathname}")
     illegalchars = ["@", ":", "*", "?", '"', "'", "<", ">", "|", "&", "#", "%", "(", ")","$", "~", "+", "="]
     cleanpath = "".join([x for x in pathname if x not in illegalchars])
     
@@ -45,6 +45,12 @@ def makeSafeName(pathname):
         p = Path(pathname)
         cleanp = Path(cleanpath)
         p.rename(cleanp)
+        pathname_msg = f"\n\
+        Illegal characters removed from pathname.\n\
+        pathname:     {pathname} \n\
+        safe pathname:     {cleanpath} \n "
+        logger.info(pathname_msg)
+        print(f"SAFEPATH:    {cleanpath}")
     else:
         cleanp = pathname 
     
