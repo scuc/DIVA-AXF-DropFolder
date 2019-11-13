@@ -53,5 +53,5 @@ def main():
     logger.info(complete_msg)
 
 if __name__ == '__main__':
-    # set_logger()
+    set_logger()
     main()
