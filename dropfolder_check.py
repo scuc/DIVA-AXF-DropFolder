@@ -57,34 +57,34 @@ def create_mdf():
 
                 os.chdir(drop_f)
 
-                # with open(mdf_doc, mode="w", encoding='utf-8-sig') as mdf_doc:
+                with open(mdf_doc, mode="w", encoding='utf-8-sig') as mdf_doc:
 
-                #     doc_body = (
-                #                 f"#\n"
-                #                 f"# Object configuration.\n"
-                #                 f"#\n"
-                #                 f"\n"
-                #                 f"priority=50\n"
-                #                 f"objectName={d}\n"
-                #                 f"categoryName=AXF\n"
-                #                 f"\n"
-                #                 f"<comments>\n"
-                #                 f"{d}\n"
-                #                 f"</comments>\n"
-                #                 f"\n"
-                #                 f"#sourceDestinationDIVAName={divaname}\n"
-                #                 f"#sourceDestinationDIVAPath={drop_f}\n"
-                #                 f"\n"
-                #                 f"<fileList>\n"
-                #                 f"{paths_string}\n"
-                #                 f"</fileList>"
-                #                 )
+                    doc_body = (
+                                f"#\n"
+                                f"# Object configuration.\n"
+                                f"#\n"
+                                f"\n"
+                                f"priority=50\n"
+                                f"objectName={d}\n"
+                                f"categoryName=AXF\n"
+                                f"\n"
+                                f"<comments>\n"
+                                f"{d}\n"
+                                f"</comments>\n"
+                                f"\n"
+                                f"#sourceDestinationDIVAName={divaname}\n"
+                                f"#sourceDestinationDIVAPath={drop_f}\n"
+                                f"\n"
+                                f"<fileList>\n"
+                                f"{paths_string}\n"
+                                f"</fileList>"
+                                )
 
-                #     mdf_doc.write(doc_body)
-                #     mdf_doc.close()
-                    # movelist.extend([dpath, os.path.join(drop_f, d + ".mdf")])
-                    # new_mdf_msg = f"New .mdf file created: {d + '.mdf'}"
-                    # logger.info(new_mdf_msg)
+                    mdf_doc.write(doc_body)
+                    mdf_doc.close()
+                    movelist.extend([dpath, os.path.join(drop_f, d + ".mdf")])
+                    new_mdf_msg = f"New .mdf file created: {d + '.mdf'}"
+                    logger.info(new_mdf_msg)
 
 
     moved_list = move_to_checkin(movelist)
