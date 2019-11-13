@@ -3,11 +3,13 @@
 import logging
 import logging.config
 import os
+import yaml
 
 from logging.handlers import TimedRotatingFileHandler
 from time import localtime, strftime
 
 import config
+import dropfolder_check as dfc
 
 
 config = config.get_config()
@@ -34,18 +36,22 @@ def main():
 
     date_frmt = str(strftime('%A, %d. %B %Y %I:%M%p', localtime()))
 
-    start_msg = f"\n\
+    start_msg = f"\n\n\
     ================================================================\n \
-                DIVA DMF Archive Script\n\
-                Version: 0.0.1\n\
-                Date: {date_frmt}\n\
+                DIVA DMF Archive Script - Start\n\
     ================================================================\n\
     \n"
 
     logger.info(start_msg)
-    logger.error(start_msg)
+    dfc.create_mdf()
 
+    complete_msg = "\n\n\
+    ================================================================\n \
+                DMF WatchFolder Check - Complete\n\
+    ================================================================\n\
+    \n"
+    logger.info(complete_msg)
 
 if __name__ == '__main__':
-    set_logger()
-    create_mdf()
+    # set_logger()
+    main()
