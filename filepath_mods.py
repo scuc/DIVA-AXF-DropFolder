@@ -15,10 +15,11 @@ def check_pathname(path):
     """
     count = 0
     for root, dirs, files in os.walk(path):
-        for name in dirs: 
+        for name in dirs:
             pathname = os.path.join(root, name)
             safe_pathname = makeSafeName(pathname)
 
+    for root, dirs, files in os.walk(path):
         for name in files:
             pathname = os.path.join(root, name)
             if pathname.endswith(".DS_Store"):
@@ -27,7 +28,7 @@ def check_pathname(path):
                 continue
             else:
                 safe_pathname = makeSafeName(pathname)
-                
+
     rm_msg = f"{count} .DS_Store files removed from dir before archive."
     logger.info(rm_msg)
     return 
@@ -37,7 +38,7 @@ def makeSafeName(pathname):
     """
     Check a path name against a list of illegal characters, remove any found. 
     """
-    print(f"PATHNAME:    {pathname}")
+
     illegalchars = ["@", ":", "*", "?", '"', "'", "<", ">", "|", "&", "#", "%", "(", ")","$", "~", "+", "="]
     cleanpath = "".join([x for x in pathname if x not in illegalchars])
     
@@ -50,7 +51,6 @@ def makeSafeName(pathname):
         pathname:     {pathname} \n\
         safe pathname:     {cleanpath} \n "
         logger.info(pathname_msg)
-        print(f"SAFEPATH:    {cleanpath}")
     else:
         cleanp = pathname 
     
