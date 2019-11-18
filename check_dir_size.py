@@ -4,10 +4,17 @@ import logging
 import os
 import time
 
+logger = logging.getLogger(__name__)
 
-def check_dir_size(dpath='/Users/stevenc/Desktop/target'):
+
+def check_dir_size(dpath):
+    """
+    Walk the dir of a potential archive and check to make sure the dir is not growing. 
+    If so, wait 5 seconds and check again, if not return and create the .mdf file. 
+    """
     checked_size = 0
     total_size = 0
+    
     while True:
         print(f"TOTAL SIZE 01:   {total_size}")
         print(f"CHECKED SIZE 01:    {checked_size}" )
