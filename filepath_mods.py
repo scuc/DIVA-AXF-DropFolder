@@ -17,24 +17,34 @@ def check_pathname(path):
     file_count = 0
     ds_count = 0
 
-    for root, dirs, files in os.walk(path):
-        for name in dirs:
-            pathname = os.path.join(root, name)
-            dir_count += 1
-            safe_pathname = makeSafeName(pathname)
-            # print(f"DIR NAME:   {pathname}")
+    try:
+        for root, dirs, files in os.walk(path):
+            dir_list = []
+            for name in dirs:
+                print(f"DIRS:    {dirs}")
+                # pathname = os.path.join(root, name)
+                dir_count += 1
+                safe_pathname = makeSafeName(root, name)
+                # print(f"DIR NAME:   {pathname}")
 
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            pathname = os.path.join(root, name)
-            # print(f"FILENAME:   {pathname}")
-            file_count += 1
-            if pathname.endswith(".DS_Store"):
-                os.remove(pathname)
-                ds_count += 1
-                continue
-            else:
-                safe_pathname = makeSafeName(pathname)
+    except Exception as e:
+        print(f"Exception on DIR Walk: \n {e}")
+
+    try: 
+        for root, dirs, files in os.walk(path):
+            for name in files:
+                pathname = os.path.join(root, name)
+                # print(f"FILENAME:   {pathname}")
+                file_count += 1
+                if pathname.endswith(".DS_Store"):
+                    os.remove(pathname)
+                    ds_count += 1
+                    continue
+                else:
+                    safe_pathname = makeSafeName(root, name)
+    except Exception as e:
+        print(f"Exception on FILE Walk: \n {e}")
+
 
     total_dir_msg = f"{dir_count} sub-directories in project {os.path.basename(path)}"
     total_files_msg = f"{file_count - ds_count} files in project {os.path.basename(path)}"
@@ -46,29 +56,29 @@ def check_pathname(path):
     return 
 
 
-def makeSafeName(pathname):
+def makeSafeName(root, name):
     """
     Check a path name against a list of illegal characters, remove any found. 
     """
 
     illegalchars = ["@", ":", "*", "?", '"', "'", "<", ">", "|", "&", "#", "%", "(", ")","$", "~", "+", "="]
-    cleanpath = "".join([x for x in pathname if x not in illegalchars])
+    cleanname = "".join([x for x in name if x not in illegalchars])
 
-    if len(pathname) != len(cleanpath): 
-        p = Path(pathname)
-        cleanp = Path(cleanpath)
+    if len(name) != len(cleanname): 
+        p = Path(os.path.join(root,name))
+        cleanp = Path(os.path.join(root,cleanname))
         p.rename(cleanp)
-        char_count = len(pathname) - len(cleanpath)
+        char_count = len(name) - len(cleanname)
         pathname_msg = f"\n\
         {char_count} illegal characters removed from pathname.\n\
-        pathname:     {pathname} \n\
-        safe pathname:     {cleanpath} \n "
+        pathname:     {name} \n\
+        safe pathname:     {cleanname} \n "
         clean_count = 1
         logger.info(pathname_msg)
     else:
-        cleanp = pathname 
+        cleanp = name 
     
-    return cleanp
+    return
 
 
 if __name__ == '__main__':
