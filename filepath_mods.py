@@ -14,23 +14,29 @@ def check_pathname(path):
     Check each path recursively, and elminiate any illegal characters.
     """
 
+    total_dir_change = 0
+
     while True:
         try:
             dir_count = 0
+            dir_chng = False
+            dir_chng_count = 0
+
             for root, dirs, files in os.walk(path):
-                dir_chng_count = 0
                 for name in dirs:
-                    # print(f"DIRS:    {dirs}")
+                    print(f"DIRS:    {dirs}")
                     pathname = os.path.join(root, name)
                     dir_count += 1
                     cleanname = makeSafeName(root, name)
-                    # print(f"DIR NAME:   {pathname}")
-                    if len(cleanname) != len(pathname):
-                        dir_chng_count += 1
-                        continue
-                    else:
-                        pass
-            if dir_chng_count != 0: 
+            
+                if len(cleanname) != len(name):
+                    dir_chng_count += 1
+                    continue
+                else:
+                    pass
+
+            if dir_chng_count != 0:
+                total_dir_change = dir_chng_count + total_dir_change
                 continue
             else: 
                 break
@@ -42,12 +48,11 @@ def check_pathname(path):
 
     try: 
         file_count = 0
-        ds_count = 0
+        ds_count = 0           
+        file_chng_count = 0
         for root, dirs, files in os.walk(path):
-            file_chng_count = 0
             for name in files:
                 pathname = os.path.join(root, name)
-                # print(f"FILENAME:   {pathname}")
                 file_count += 1
                 if pathname.endswith(".DS_Store"):
                     os.remove(pathname)
@@ -55,7 +60,7 @@ def check_pathname(path):
                     continue
                 else:
                     cleanname = makeSafeName(root, name)
-                    if len(cleanname) != len(pathname):
+                    if len(cleanname) != len(name):
                         file_chng_count += 1
                     else:
                         pass
@@ -66,7 +71,7 @@ def check_pathname(path):
 
     total_dir_msg = f"{dir_count} sub-directories in project {os.path.basename(path)}"
     total_files_msg = f"{file_count - ds_count} files in project {os.path.basename(path)}"
-    dir_name_change_msg = f"{dir_chng_count} directory names changed to remove illegal characters."
+    dir_name_change_msg = f"{total_dir_change} directory names changed to remove illegal characters."
     file_name_change_msg = f"{file_chng_count} file names changed to remove illegal characters."
     rm_msg = f"{ds_count} .DS_Store files removed from dir before archive."
     
@@ -88,7 +93,7 @@ def makeSafeName(root, name):
 
     if len(remove_chars) != 0: 
 
-        cleanname = name.replace("&", " and ")
+        cleanname = name.replace("&", "and")
         cleanname = cleanname.replace(":", " ")
         cleanname = cleanname.replace("=", " ")
         cleanname = "".join([x for x in cleanname if x not in illegalchars])
@@ -99,8 +104,8 @@ def makeSafeName(root, name):
 
         pathname_msg = f"\n\
         {remove_chars} - illegal characters removed from pathname.\n\
-        pathname:     {name} \n\
-        safe pathname:     {cleanname} \n "
+        name:     {name} \n\
+        clean name:     {cleanname} \n "
         logger.info(pathname_msg)
 
     else:
