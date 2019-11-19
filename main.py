@@ -13,7 +13,7 @@ import dropfolder_check as dfc
 
 
 config = config.get_config()
-archive_f = config['paths']['archive_dropfolder']
+archive_f = config['paths']['mac_archive_dropfolder']
 drop_f = config['paths']['mac_dropfolder']
 divaname = config['paths']['DIVAName']
 
@@ -34,7 +34,7 @@ def set_logger():
 
 def main(): 
 
-    date_frmt = str(strftime('%A, %d. %B %Y %I:%M%p', localtime()))
+    # date_frmt = str(strftime('%A, %d. %B %Y %I:%M%p', localtime()))
 
     start_msg = f"\n\n\
     ================================================================\n \
