@@ -29,11 +29,11 @@ def check_pathname(path):
                     dir_count += 1
                     cleanname = makeSafeName(root, name)
             
-                if len(cleanname) != len(name):
-                    dir_chng_count += 1
-                    continue
-                else:
-                    pass
+                    if len(cleanname) != len(name):
+                        dir_chng_count += 1
+                        continue
+                    else:
+                        pass
 
             if dir_chng_count != 0:
                 total_dir_change = dir_chng_count + total_dir_change
