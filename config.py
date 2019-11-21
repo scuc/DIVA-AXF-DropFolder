@@ -7,7 +7,7 @@ import yaml
 def get_config():
     """Setup configuration and credentials
     """
-    path = 'config.yml'
+    path = 'config.yaml'
 
     with open(path, 'rt') as f:
         config = yaml.safe_load(f.read())
