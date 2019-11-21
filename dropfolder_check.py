@@ -39,10 +39,9 @@ def create_mdf():
         dlist_msg = f"New directories for DMF archiving: {dlist}"
         logger.info(dlist_msg)
 
-    movelist = []
-
     if len(dlist) != 0: 
         for d in dlist: 
+            movelist = []
             mdf_doc = d + '.mdf'
             count=0
             if os.path.exists(os.path.join(archive_f,mdf_doc)):
@@ -91,9 +90,9 @@ def create_mdf():
                         new_mdf_msg = f"New .mdf file created: {d + '.mdf'}"
                         logger.info(new_mdf_msg)
 
-        moved_list = move_to_checkin(movelist)
-        move_msg = f"The following directories have been moved into the archiving location: \n{moved_list}"
-        logger.info(move_msg)
+                    moved_list = move_to_checkin(movelist)
+                    move_msg = f"The following directories have been moved into the archiving location: \n{moved_list}"
+                    logger.info(move_msg)
     else:
         return
 
