@@ -6,6 +6,7 @@ import re
 import shutil
 
 import config
+import archive_queue as aqueue
 import check_dir_size as checksize
 import filepath_mods as fpmod
 
@@ -26,6 +27,8 @@ def create_mdf():
     to write a .mdf file that is used as the trigger for
     the DIVA archive job. 
     """
+
+    aqueue.archiving_check()
 
     dlist = [d for d in os.listdir(
         drop_f) if os.path.isdir(os.path.join(drop_f, d)) and 
