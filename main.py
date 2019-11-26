@@ -13,7 +13,7 @@ import dropfolder_check as dfc
 
 
 config = config.get_config()
-archive_f = config['paths']['mac_archive_dropfolder']
+archive_f = config['paths']['mac_archive_folder']
 drop_f = config['paths']['mac_dropfolder']
 divaname = config['paths']['DIVAName']
 
