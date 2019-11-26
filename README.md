@@ -3,8 +3,12 @@ A script for automating the creation of .MDF files that are used to trigger
 DIVA Archive from withinb a DMF Drop folder. 
 
 ## Description
-The script takes [DIVAArchive](https://www.goecodigital.com) to
+The script is used in conjunction with the [DIVAArchive](https://www.goecodigital.com) LTO library software. <br>
 
+The DIVA DMF service is configured to monitor the drop folder location for .MDF files. The .MDF files are text files that act as the trigger for DIVA to begin archiving, and they contain all the
+information related to the object that needs to be archived. <br><br>This script can be run as a cron job or with Windows Task Scheduler so that .MDF files are generated automatically within a few minutes after a folder in placed in the drop folder. 
+
+The DIVA portion of this workflow is not detailed or covered here.  
 
 The script follows a series of steps: 
 
