@@ -55,7 +55,6 @@ def check_dir_size(dpath):
                 time.sleep(30)
                 continue
 
-
             elif (total_size != checked_size
                 and check_count == 3):
                 directory_value = 1
