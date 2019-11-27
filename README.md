@@ -1,4 +1,4 @@
-# DIVA\_DMF\_DropFolder
+# DIVA DMF DropFolder
 A Python script for automating the creation of .MDF. These files are used to trigger
 DIVA Archive DMF service for archiving media objects (folder sets) to LTO tape. 
 
