@@ -83,4 +83,5 @@ The script follows a series of steps:
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; win\_archive_folder:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; DIVAName:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
  
-
+* In the terminal cd to the source directory for the script and enter the command:<br>
+&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp; `python main.py`
