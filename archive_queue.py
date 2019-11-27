@@ -29,7 +29,7 @@ def archiving_check():
             
             alist_count = len(alist)
 
-            if alist_count > 10: 
+            if alist_count > 15: 
                 print(f"LIST LENGTH:  {alist_count} ")
                 cycle_count += 1
                 print(f"CYCLE COUNT:  {cycle_count} ")
@@ -45,7 +45,7 @@ def archiving_check():
                     pause_msg = f"Current active archive count: {alist_count}"
                     pass
                 logger.info(pause_msg)
-                time.sleep(300)
+                time.sleep(90)
                 continue
             else: 
                 queue_clear_msg = f"Archiving Queue has cleared. \n\
