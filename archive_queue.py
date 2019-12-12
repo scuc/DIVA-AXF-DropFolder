@@ -29,7 +29,7 @@ def archiving_check():
             
             alist_count = len(alist)
 
-            if alist_count > 15: 
+            if alist_count > 5: 
                 print(f"LIST LENGTH:  {alist_count} ")
                 cycle_count += 1
                 print(f"CYCLE COUNT:  {cycle_count} ")
@@ -37,10 +37,17 @@ def archiving_check():
                 if cycle_count == 0: 
                     pause_msg = f"Fold Sets archiving: {alist_count}\n\
                                   Script will pause while archive queue clears."
-                elif cycle_count%5 == 0:
+                elif (cycle_count%5 == 0
+                    and cycle_count != 30):
                     pause_msg = f"Archiving Queue paused for: {cycle_count*300} seconds \n\
                                   Current active archive count: {alist_count}\n\
                                   Processing will resume when the active archive count drops."
+                elif cycle_count == 30: 
+                    pause_msg = f"Archiving Queue paused for: {cycle_count*300} seconds \n\
+                                Current active archive count: {alist_count}\n\
+                                STOPPING ARCHIVE ATTEMPT, will try again later"
+                    queue_status = 1
+                    return queue_status
                 else:
                     pause_msg = f"Current active archive count: {alist_count}"
                     pass
@@ -53,7 +60,8 @@ def archiving_check():
                                     Processing of new sets was paused for a total of {cycle_count*300}.seconds.\n\
                                     The script will now continue."
                 logger.info(queue_clear_msg)
-                return 
+                queue_status = 0
+                return queue_status
 
         except Exception as e:
             logger.exception(e)

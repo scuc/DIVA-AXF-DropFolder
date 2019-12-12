@@ -28,7 +28,12 @@ def create_mdf():
     the DIVA archive job. 
     """
 
-    aqueue.archiving_check()
+    queue_status = aqueue.archiving_check()
+
+    if queue_status != 0:
+        return
+    else:
+        pass
 
     dlist = [d for d in os.listdir(
         drop_f) if os.path.isdir(os.path.join(drop_f, d)) and 
