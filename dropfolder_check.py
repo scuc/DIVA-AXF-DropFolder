@@ -48,15 +48,19 @@ def create_mdf():
         logger.info(dlist_msg)
 
     if len(dlist) != 0: 
+        count = 0
         for d in dlist: 
             movelist = []
             mdf_doc = d + '.mdf'
-            count=0
             if os.path.exists(os.path.join(archive_f,mdf_doc)):
                 dlist.remove(d)
                 fileexist_msg = f"{mdf_doc} already exists in the archive folder, skipping"
                 logger.info(fileexist_msg)
                 continue
+            elif count > 5: 
+                max_count_msg = f"Maximum number of folder submissions reached for this archive cycle."
+                logger.info(max_count_msg)
+                return
             else: 
                 dpath = os.path.join(drop_f,d)
                 dir_value = checksize.check_dir_size(dpath)
@@ -101,6 +105,7 @@ def create_mdf():
                     moved_list = move_to_checkin(movelist)
                     move_msg = f"The following directories have been moved into the archiving location: \n{moved_list}"
                     logger.info(move_msg)
+                    count+=1 
     else:
         return
 
