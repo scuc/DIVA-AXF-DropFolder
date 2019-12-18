@@ -37,7 +37,7 @@ def create_mdf():
 
     dlist = [d for d in os.listdir(
         drop_f) if os.path.isdir(os.path.join(drop_f, d)) and 
-        d != "_archiving"]
+        d not in ["_archiving", "_incomplete"]]
 
     if dlist == []:
         empty_msg = f"No new dir for DMF archiving."

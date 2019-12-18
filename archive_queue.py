@@ -2,6 +2,7 @@
 
 import logging
 import os
+import shutil
 import time
 
 import config
@@ -26,7 +27,17 @@ def archiving_check():
             alist = [a for a in os.listdir(
                 archive_f) if os.path.isdir(os.path.join(archive_f, a)) and
                 a != a.endswith(".mdf")]
-            
+
+            for a in alist: 
+                if a.startswith(".incomplete_"):
+                    dest = os.path.join(drop_f, "_incomplete")
+                    shutil.move(os.path.join(archive_f, a), drop_f )
+                    shutil.move(os.path.join(archive_f, a[12:]), drop_f)
+                    incomplete_msg = f"{a},{a[12:]} = removed from the archiving folder."
+                    logger.info(incomplete_msg)
+                else:
+                    pass
+
             alist_count = len(alist)
 
             if alist_count > 5: 
