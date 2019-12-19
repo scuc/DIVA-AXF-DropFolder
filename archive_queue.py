@@ -58,6 +58,7 @@ def archiving_check():
                                 Current active archive count: {alist_count}\n\
                                 STOPPING ARCHIVE ATTEMPT, will try again later"
                     queue_status = 1
+                    logger.info(pause_msg)
                     return queue_status
                 else:
                     pause_msg = f"Current active archive count: {alist_count}"
