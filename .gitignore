@@ -5,6 +5,10 @@
 # Config File
 config.yaml
 
+# Directories
+/_logs
+/_Test_files
+
 ### macOS ###
 # General
 .DS_Store
