@@ -3,31 +3,44 @@
 import logging
 import os
 import re
+import shutil
 
 from pathlib import Path
 
+import config
+
 logger = logging.getLogger(__name__)
+
+config = config.get_config()
+archive_error_f = config['paths']['mac_archive_error_folder']
+
 
 
 def check_pathname(path):
     """
     Check each path recursively, and elminiate any illegal characters.
     """
-
+    #print("STARTING")
     total_dir_change = 0
 
     while True:
+
         try:
             dir_count = 0
             dir_chng = False
             dir_chng_count = 0
 
             for root, dirs, files in os.walk(path):
+                
                 for name in dirs:
-                    print(f"DIRS:    {dirs}")
+                    #print(f"DIRS:    {dirs}")
                     pathname = os.path.join(root, name)
                     dir_count += 1
                     cleanname = makeSafeName(root, name)
+
+                    if cleanname == False: 
+                        move_to_archive_error(path)
+                        return
             
                     if len(cleanname) != len(name):
                         dir_chng_count += 1
@@ -60,10 +73,16 @@ def check_pathname(path):
                     continue
                 else:
                     cleanname = makeSafeName(root, name)
+                    
+                    if cleanname == False:
+                        move_to_archive_error(path)
+                        return
+
                     if len(cleanname) != len(name):
                         file_chng_count += 1
                     else:
                         pass
+
     except Exception as e:
         file_walk_msg = f"Exception on FILE Walk: \n {e}"
         logger.error(file_walk_msg)
@@ -80,6 +99,7 @@ def check_pathname(path):
     logger.info(dir_name_change_msg)
     logger.info(file_name_change_msg)
     logger.info(rm_msg)
+   #print("END")
     return 
 
 
@@ -91,27 +111,41 @@ def makeSafeName(root, name):
     illegalchars = ["@", ":", "*", "?", "!", '"', "'", "<", ">", "|", "&", "#", "%","$", "~", "+", "="]
     remove_chars = [x for x in name if x in illegalchars]
 
-    if len(remove_chars) != 0: 
+    try: 
+        #print("START MAKE SAFE")
+        if len(remove_chars) != 0: 
 
-        cleanname = name.replace("&", "and")
-        cleanname = cleanname.replace(":", " ")
-        cleanname = cleanname.replace("=", " ")
-        cleanname = "".join([x for x in cleanname if x not in illegalchars])
+            cleanname = name.replace("&", "and")
+            cleanname = cleanname.replace(":", " ")
+            cleanname = cleanname.replace("=", " ")
+            cleanname = "".join([x for x in cleanname if x not in illegalchars])
 
-        p = Path(os.path.join(root,name))
-        cleanp = Path(os.path.join(root,cleanname))
-        p.rename(cleanp)
+            p = Path(os.path.join(root,name))
+            cleanp = Path(os.path.join(root,cleanname))
+            p.rename(cleanp)
 
-        pathname_msg = f"\n\
-        {remove_chars} - illegal characters removed from pathname.\n\
-        name:     {name} \n\
-        clean name:     {cleanname} \n "
-        logger.info(pathname_msg)
+            pathname_msg = f"\n\
+            {remove_chars} - illegal characters removed from pathname.\n\
+            name:     {name} \n\
+            clean name:     {cleanname} \n "
+            logger.info(pathname_msg)
 
-    else:
-        cleanname = name
-    
+        else:
+            cleanname = name
+
+    except Exception as e:
+        make_safe_msg = f"Exception raised on attempt to clean illegal characters: \n {e}"
+        logger.error(make_safe_msg)
+        cleanname = False
+
     return cleanname
+
+
+def move_to_archive_error(path):
+
+    shutil.move(path, archive_error_f)
+    return 
+
 
 
 if __name__ == '__main__':
