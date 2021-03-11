@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def check_dir_size(dpath):
     """
     Walk the dir of a potential archive and check to make sure the dir is not growing. 
-    If so, wait 5 seconds and check again, if not return and create the .mdf file. 
+    If so, wait 5 seconds and check again, if not return and create the .csv file. 
     directory_value: 
     0 = Dir is not growing, proceed
     1 = Dir is growing, and has exceeded wait time, move on. 
@@ -40,7 +40,7 @@ def check_dir_size(dpath):
             check_count += 1
 
             dir_growing_msg = f"Dir size is still growing for:  {os.path.basename(dpath)}"
-            pause_message = f"Waiting 30 seconds to remeasure dir size."
+            pause_message = f"Waiting 10 seconds to remeasure dir size."
             chk_count_message = f"Check Count = {check_count}"
 
             if (total_size != checked_size
@@ -52,7 +52,7 @@ def check_dir_size(dpath):
                 logger.info(chk_count_message)
                 logger.info(pause_message)
 
-                time.sleep(30)
+                time.sleep(10)
                 continue
 
             elif (total_size != checked_size
@@ -73,6 +73,9 @@ def check_dir_size(dpath):
             break
         except Exception as e:
             logger.exception(e)
+            if OSError:
+                dir_value = 3
+                return dir_value
             break
 
     return directory_value
