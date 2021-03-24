@@ -8,9 +8,11 @@ import yaml
 
 from datetime import datetime
 from time import localtime, strftime
+from sys import platform
 
 import config
 import dropfolder_check_csv as dfc
+import permissions_fix as permissions
 
 config = config.get_config()
 archive_f = config['paths']['mac_archive_folder']
@@ -32,7 +34,7 @@ def set_logger():
     # get the file name from the handlers, append the date to the filename. 
         for i in (config["handlers"].keys()):
             local_datetime = str(strftime('%A, %d. %B %Y %I:%M%p', localtime()))
-            
+
             if 'filename' in config['handlers'][i]:
                 log_filename = config["handlers"][i]["filename"]
                 base, extension = os.path.splitext(log_filename)
@@ -61,7 +63,11 @@ def main():
     ================================================================\n\
    "
 
-    logger.info(start_msg)
+    logger.info(start_msg) 
+
+    if platform == "darwin":
+        permissions.chmod_chown()
+
     dfc.create_csv()
 
     date_end = str(strftime('%A, %d. %B %Y %I:%M%p', localtime()))

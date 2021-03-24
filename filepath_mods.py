@@ -147,7 +147,6 @@ def move_to_archive_error(path):
     return 
 
 
-
 if __name__ == '__main__':
     check_pathname(path)
 
