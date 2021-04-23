@@ -10,6 +10,7 @@ from pathlib import Path
 from sys import platform
 
 import config
+import api_DIVA as api
 import archive_queue as aqueue
 import check_dir_size as checksize
 import filepath_mods as fpmod
@@ -18,6 +19,7 @@ import permissions_fix as permissions
 config = config.get_config()
 archive_f_mac = config['paths']['mac_archive_folder'] #script is executed from a mac
 archive_f_win = config['paths']['win_archive_folder'] #diva servers are Win, use UNC to view files.
+duplicate_f_mac = config['paths']['mac_duplicate_folder'] 
 drop_f = config['paths']['mac_dropfolder']
 obj_category = config['paths']['DIVA_Obj_Category']
 source_dest = config['paths']['DIVA_Source_Dest']
@@ -64,15 +66,40 @@ def create_csv():
         logger.info(empty_msg)
         return
     else:
-        dlist_msg = f"New directories for archiving: {dlist}"
-        logger.info(dlist_msg)
-
-        if platform == "darwin":
-            permissions.chmod_chown()
 
         t = time.time()
         date = time.strftime('%Y%m%d%H%M', time.localtime(t))
         csv_doc = f"{date}_diva.csv"
+
+        dlist_msg = f"New directories for archiving: {dlist}"
+        logger.info(dlist_msg)
+
+        # Run a sudo permissions fix, it only works when executed from POSIX system.
+        # if platform == "darwin":
+        #     permissions.chmod_chown()
+
+        # check list of directories against the DIVA DB, look for duplicates and remove from list
+        dedup_dlist = []
+        for d in dlist: 
+            archive_object = os.path.join(drop_f,d)
+            duplicate = api.api_file_check(d)
+
+            if duplicate == True: 
+                if os.path.exists(os.path.join(duplicate_f_mac,d)):
+                    #if dir by the same name already exisits in Duplicates, append datetime stamp before move.
+                    arch_obj_dt = os.rename(archive_object, f"{archive_object}_{date}")
+                    shutil.move(arch_obj_dt, duplicate_f_mac) 
+                else: 
+                     shutil.move(archive_object, duplicate_f_mac) 
+            elif duplicate == "error": 
+                shutil.move(archive_object, archive_error_f) 
+            else:
+                dedup_dlist.append(d)
+
+        dedup_dlist_msg = f"New dir list after duplicates removed: {dedup_dlist}"
+        logger.info(dedup_dlist_msg)
+
+
 
         movelist = []
         movelist.append(os.path.join(drop_f, csv_doc))
@@ -83,7 +110,7 @@ def create_csv():
             csv_writer = csv.writer(csv_file, delimiter=',')
 
             count = 0
-            for d in dlist:
+            for d in dedup_dlist:
                 dpath = os.path.join(drop_f, d)
                 dir_value = checksize.check_dir_size(dpath)
 
