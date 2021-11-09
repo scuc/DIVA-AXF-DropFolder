@@ -27,16 +27,10 @@ def check_dir_size(dpath):
             for dirpath, dirnames, filenames in os.walk(dpath):
                 for f in filenames:
                     fp = os.path.join(dirpath, f)
-                    total_size += os.path.getsize(fp)
-                
-            size_chk_msg = f"\n\
-            ================================================================\n\
-                        Checking Size for Dir: {os.path.basename(dpath)}\n\
-                        Total Dir Size at Start: {checked_size}\n\
-                        Total Dir Size at Finish: {total_size}\n\
-            ================================================================\
-            "
-            logger.info(size_chk_msg)
+                    checked_size = os.path.getsize(fp)
+                    if checked_size != total_size: 
+                        total_size = checked_size
+            
             check_count += 1
 
             dir_growing_msg = f"Dir size is still growing for:  {os.path.basename(dpath)}"
@@ -46,11 +40,9 @@ def check_dir_size(dpath):
             if (total_size != checked_size
                 and check_count < 3):
 
-                checked_size = total_size
-                total_size = 0
-
                 logger.info(chk_count_message)
                 logger.info(pause_message)
+                log_sizecheck_msg(dpath, checked_size, total_size)
 
                 time.sleep(10)
                 continue
@@ -61,6 +53,7 @@ def check_dir_size(dpath):
                 count_end_msg = f"{os.path.basename(dpath)} - dir is still growing after 90sec, moving to next dir for archive."
                 logger.info(chk_count_message)
                 logger.info(count_end_msg)
+                log_sizecheck_msg(dpath, checked_size, total_size)
                 break
 
             elif (total_size == checked_size
@@ -68,18 +61,30 @@ def check_dir_size(dpath):
                 dir_notgrowing_msg = f"{os.path.basename(dpath)}  is ready for archive. End of size check."
                 logger.info(chk_count_message)
                 logger.info(dir_notgrowing_msg)
+                log_sizecheck_msg(dpath, checked_size, total_size)
                 directory_value = 0
                 break
-            break
+
         except Exception as e:
             logger.exception(e)
             if OSError:
-                dir_value = 3
-                return dir_value
-            break
+                directory_value = 3
+            return directory_value
 
     return directory_value
 
 
+def log_sizecheck_msg(dpath, checked_size, total_size):
+    size_chk_msg = f"\n\
+    ================================================================\n\
+                Checking Size for Dir: {os.path.basename(dpath)}\n\
+                Total Dir Size at Start: {checked_size}\n\
+                Total Dir Size at Finish: {total_size}\n\
+    ================================================================\
+    "
+    logger.info(size_chk_msg)
+    return
+
+
 if __name__ == '__main__':
-    check_dir_size(dpath)
+    check_dir_size("/Volumes/Quantum3/__Archive/_AXF_Archive_ERROR/88023_074995_GFX")

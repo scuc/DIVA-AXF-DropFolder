@@ -15,9 +15,13 @@ import dropfolder_check_csv as dfc
 import permissions_fix as permissions
 
 config = config.get_config()
-archive_f = config['paths']['mac_archive_folder']
-drop_f = config['paths']['mac_dropfolder']
+
+
 script_root = config['paths']['script_root']
+drop_folders = [
+                os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['drop_folder']), 
+                os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['drop_folder']),
+                ]
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +49,7 @@ def set_logger():
                                                 extension)
                 config["handlers"][i]["filename"] = log_filename
             else:
-                print(f"=========== ERROR STARTING LOG FILE, {local_datetime} ===========")
+                continue
 
         logger = logging.config.dictConfig(config)
 
@@ -66,7 +70,15 @@ def main():
     logger.info(start_msg) 
 
     if platform == "darwin":
-        permissions.chmod_chown()
+        p = permissions.chmod_chown(drop_folders)
+    else: 
+        p = None
+    
+    # if (p != "error" 
+    #     or platform != "darwin"):
+    #     dfc.create_csv()
+    # else: 
+    #     pass
 
     dfc.create_csv()
 

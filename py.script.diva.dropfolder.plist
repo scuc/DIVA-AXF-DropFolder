@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>EnvironmentVariables</key>
+		<dict>
+			<key>PATH</key>
+			<string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin</string>
+		</dict>
+		<key>Label</key>
+		<string>py.script.diva.dropfolder</string>
+		<key>ProgramArguments</key>
+		<array>
+			<string>/usr/local/bin/python3</string>
+			<string>/Users/admin/Scripts/DIVA_DropFolder/main.py</string>
+		</array>
+		<key>StartInterval</key>
+		<integer>600</integer>
+
+		<key>StandardErrorPath</key>
+		<string>/tmp/diva-dropfolder-script.err</string>
+		<key>StandardOutPath</key>
+		<string>/tmp/diva-dropfolder-script.out</string>
+	</dict>
+</plist>

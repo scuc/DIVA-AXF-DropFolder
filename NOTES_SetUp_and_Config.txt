@@ -1,0 +1,11 @@
+
+========================================
+NOTES For DIVA Watch Folder Script
+=========================================
+
+
+launchd agent .plist must be placed into ~/Library/LaunchAgents/
+~/Library/LaunchAgents - dir should have permissions 755 
+
+load the plist with the terminal command - 
+sudo launchctl load ~/Library/LaunchAgents/py.script.diva.dropfolder.plist 

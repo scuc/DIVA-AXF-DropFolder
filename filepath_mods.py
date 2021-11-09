@@ -12,9 +12,11 @@ import config
 logger = logging.getLogger(__name__)
 
 config = config.get_config()
-archive_error_f = config['paths']['mac_archive_error_folder']
 
-
+archive_error_f = [
+                os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['error']), 
+                os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['error']),
+                ]
 
 def check_pathname(path):
     """
@@ -33,12 +35,14 @@ def check_pathname(path):
             for root, dirs, files in os.walk(path):
                 
                 for name in dirs:
-                    #print(f"DIRS:    {dirs}")
+                    # print(f"DIRS:    {dirs}")
                     pathname = os.path.join(root, name)
                     dir_count += 1
                     cleanname = makeSafeName(root, name)
 
                     if cleanname == False: 
+                        name_err_msg = f"Error (E1) cleaning filename, moving to Archive_Error - {pathname}"
+                        logger.info(name_err_msg)
                         move_to_archive_error(path)
                         return
             
@@ -57,7 +61,7 @@ def check_pathname(path):
         except Exception as e:
             dir_walk_msg = f"Exception on DIR Walk: \n {e}"
             logger.error(dir_walk_msg)
-            continue
+            break
 
     try: 
         file_count = 0
@@ -75,6 +79,8 @@ def check_pathname(path):
                     cleanname = makeSafeName(root, name)
                     
                     if cleanname == False:
+                        name_err_msg = f"Error(E2) cleaning filename, moving to Archive_Error - {pathname}"
+                        logger.info(name_err_msg)
                         move_to_archive_error(path)
                         return
 
@@ -99,7 +105,6 @@ def check_pathname(path):
     logger.info(dir_name_change_msg)
     logger.info(file_name_change_msg)
     logger.info(rm_msg)
-   #print("END")
     return 
 
 
@@ -112,12 +117,12 @@ def makeSafeName(root, name):
     remove_chars = [x for x in name if x in illegalchars]
 
     try: 
-        #print("START MAKE SAFE")
+        # print("START MAKE SAFE")
         if len(remove_chars) != 0: 
 
             cleanname = name.replace("&", "and")
-            cleanname = cleanname.replace(":", " ")
-            cleanname = cleanname.replace("=", " ")
+            cleanname = cleanname.replace(":", "_")
+            cleanname = cleanname.replace("=", "_")
             cleanname = "".join([x for x in cleanname if x not in illegalchars])
 
             p = Path(os.path.join(root,name))
@@ -135,6 +140,7 @@ def makeSafeName(root, name):
 
     except Exception as e:
         make_safe_msg = f"Exception raised on attempt to clean illegal characters: \n {e}"
+        print(f"EXCEPTION:   {e}  ")
         logger.error(make_safe_msg)
         cleanname = False
 
@@ -142,13 +148,14 @@ def makeSafeName(root, name):
 
 
 def move_to_archive_error(path):
-
-    shutil.move(path, archive_error_f)
+    error_f = os.path.join(path[:28], "_AXF_Archive_ERROR/")
+    shutil.move(path, error_f)
     return 
 
 
+
 if __name__ == '__main__':
-    check_pathname(path)
+    check_pathname("/Volumes/Quantum3/__Archive/_AXF_Archive_ERROR/88023_074995_BiteStingKill_MastersOfTheCoasts_EM_ALL_WAV")
 
 
 
