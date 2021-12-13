@@ -22,19 +22,23 @@ config = config.get_config()
 archive_error_f = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['error']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['error']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['error']),
                 ]
 archive_f_win = [ #diva servers are Win, use UNC to view files.
                 config['paths']['win_archive']['storage01'], 
                 config['paths']['win_archive']['storage02'],
+                config['paths']['win_archive']['storage03'],
                 ] 
 drop_folders = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['drop_folder']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['drop_folder']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['drop_folder']),
                 ]
 obj_category = config['DIVA_Obj_Category']
 source_dest = [
                 config['DIVA_Source_Dest']['storage01'],
                 config['DIVA_Source_Dest']['storage02'],
+                config['DIVA_Source_Dest']['storage03'],
                 ]
 
 

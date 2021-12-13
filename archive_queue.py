@@ -13,14 +13,17 @@ config = config.get_config()
 archive_error_f = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['error']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['error']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['error']),
                 ]
 drop_folders = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['drop_folder']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['drop_folder']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['drop_folder']),
                 ]
 archive_folders = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['archiving']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['archiving']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['archiving']),
                 ]
 
 logger = logging.getLogger(__name__)
