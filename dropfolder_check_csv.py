@@ -91,8 +91,8 @@ def create_csv():
     _incomplete. 
     """
     index = 0
-    for folder in drop_folders: 
-        volume_name = folder[9:17]
+    for dropfolder in drop_folders: 
+        volume_name = dropfolder[9:17]
         check_df_msg = f"Checking drop folder on: {volume_name}"
         logger.info(check_df_msg)
 
@@ -102,13 +102,20 @@ def create_csv():
         df_delimiter_msg = f"\n\n====================== DROP FOLDER: {volume_name} =========================\n\\"
         logger.info(df_delimiter_msg)
 
-        dir_list = [d for d in os.listdir(folder) 
-            if os.path.isdir(os.path.join(folder, d)) and
-            d not in ["_archiving", "_incomplete"]]
-            # dlist = dlist + dir_list
+        dir_list = [d for d in os.listdir(dropfolder) 
+            if os.path.isdir(os.path.join(dropfolder, d)) 
+            and d not in ["_archiving", "_incomplete"]]
+        
+        file_list = [f for f in os.listdir(dropfolder)
+                     if os.path.isfile(os.path.join(dropfolder, f))
+                     and f not in ["_archiving", "_incomplete"]
+                     and f.endswith(".mov")
+                     or f.endswith(".mxf")]
+        
+        archive_list = dir_list + file_list
 
-        if len(dir_list) == 0:
-            empty_msg = f"{folder[9:17]} = No new dir for archiving."
+        if len(archive_list) == 0:
+            empty_msg = f"{dropfolder[9:17]} = No new dir for archiving."
             logger.info(empty_msg)
             index += 1
             continue
@@ -116,23 +123,23 @@ def create_csv():
         else:
             t = time.time()
             date = time.strftime('%Y%m%d%H%M', time.localtime(t))
-            dedup_dlist = dedup_list(dir_list, date, folder)
+            dedup_dlist = dedup_list(archive_list, date, dropfolder)
             csv_doc = f"{date}_diva.csv"
 
             dlist_msg = f"New directories for archiving: {dedup_dlist}"
             logger.info(dlist_msg)
 
             movelist = []
-            movelist.append(os.path.join(folder, csv_doc))
+            movelist.append(os.path.join(dropfolder, csv_doc))
 
-            os.chdir(folder)
+            os.chdir(dropfolder)
 
         with open(f"{csv_doc}", mode='w', newline='', encoding='utf-8-sig') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',')
 
             count = 0
             for d in dedup_dlist:
-                dpath = os.path.join(folder, d)
+                dpath = os.path.join(dropfolder, d)
                 dir_value = checksize.check_dir_size(dpath)
                 
                 if dir_value == 1:
@@ -151,7 +158,7 @@ def create_csv():
                             ["object name", "object category", "source destination", "root path", "list of files"])
 
                     if count == 10:
-                        max_count_msg = f"Maximum number of folder submissions reached for this archive cycle."
+                        max_count_msg = f"Maximum number of submissions reached for this archive cycle."
                         logger.info(max_count_msg)
                         break
 
@@ -166,7 +173,7 @@ def create_csv():
             new_csv_msg = f"New .csv file created: {csv_doc}"
             logger.info(new_csv_msg)
 
-            moved_list = move_to_checkin(movelist, folder)
+            moved_list = move_to_checkin(movelist, dropfolder)
             move_msg = f"Directories moved into archiving on {volume_name}: \n{moved_list}"
             logger.info(move_msg)
         index += 1
@@ -181,15 +188,15 @@ def get_csv_count():
     return csv_count, f
 
 
-def dedup_list(dir_list, date, folder):
+def dedup_list(archive_list, date, dropfolder):
     """
     check list of directories against the DIVA DB, look for duplicates and remove from list
     """
     dedup_dlist = []
     duplicates = []
-    for d in dir_list: 
+    for d in archive_list: 
         try: 
-            archive_object = os.path.join(folder,d)
+            archive_object = os.path.join(dropfolder,d)
             duplicate = api.api_file_check(d)
 
             if duplicate == True:
@@ -198,29 +205,29 @@ def dedup_list(dir_list, date, folder):
             elif duplicate == "error": 
                 dup_err_msg = f"Error returned on duplicate check, moving to Archive Error: {d}"
                 logger.error(dup_err_msg)
-                shutil.move(archive_object, os.path.join(folder, "_AXF_Archive_ERROR")) 
+                shutil.move(archive_object, os.path.join(dropfolder, "_AXF_Archive_ERROR")) 
             else:
                 dedup_dlist.append(d)
         except Exception as e: 
             dup_excp_msg = f"Exception raised on Duplicate check: \n {e}"
             logger.error(dup_excp_msg)
 
-    dedup_dlist_msg = f"New dir list after duplicates removed: {dedup_dlist}"
+    dedup_dlist_msg = f"New archive list after duplicates removed: {dedup_dlist}"
     logger.info(dedup_dlist_msg)
 
     duplicates_msg = f"Duplicates detected: {duplicates}"
     logger.info(duplicates_msg)
     
-    dup_rename(duplicates, date, folder)
+    dup_rename(duplicates, date, dropfolder)
 
     return dedup_dlist
 
 
-def dup_rename(duplicates, date, folder):
+def dup_rename(duplicates, date, dropfolder):
     #if dir by the same name already exisits in DIVA, append dir name with datetime stamp.
     try:
         for dup in duplicates:
-            archive_object = os.path.join(folder, dup) 
+            archive_object = os.path.join(dropfolder, dup) 
             arch_obj_dt = f"{archive_object}_{date}"
             obj_rename_msg = f"Duplicate object, renamed:  {arch_obj_dt}"
             logger.info(obj_rename_msg)

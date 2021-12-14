@@ -36,8 +36,7 @@ def get_archiving_list():
     archiving_list = []
     for x in archive_folders:
         alist = [d for d in os.listdir(x) 
-        if os.path.isdir(os.path.join(x, d)) and
-        not d.startswith(".")]
+        if not d.startswith(".")]
         archiving_list = archiving_list + alist
     return archiving_list
 
