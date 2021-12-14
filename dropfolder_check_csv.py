@@ -161,9 +161,14 @@ def create_csv():
                         max_count_msg = f"Maximum number of submissions reached for this archive cycle."
                         logger.info(max_count_msg)
                         break
-
-                    csv_writer.writerow(
+                    
+                    if os.path.isfile(dpath):
+                        csv_writer.writerow(
+                        [f"{d}", obj_category, source_destination, archive_f_windows, f"{d}"])
+                    else: 
+                        csv_writer.writerow(
                         [f"{d}", obj_category, source_destination, archive_f_windows, f"{d}/*"])
+                        
                     movelist.append(dpath)
 
                 count += 1

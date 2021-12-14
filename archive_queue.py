@@ -52,7 +52,7 @@ def archiving_check():
             archiving_list = get_archiving_list()
             alist_count = len(archiving_list)
 
-            if alist_count > 10: 
+            if alist_count > 20: 
 
                 if cycle_count == 0: 
                     pause_msg = f"Folder Sets archiving: {alist_count}\n\
