@@ -9,7 +9,7 @@ cd $1
 sudo -u admin chflags nouchg ./
 sudo chmod -R 777 ./
 sudo chmod -RN ./
-sudo chown -R admin:staff ./
+sudo chown -R 40006:50004 ./
 sudo xattr -rc ./
 
 # sudo -u admin -H sh -c "sh /path/to/myscript.sh"

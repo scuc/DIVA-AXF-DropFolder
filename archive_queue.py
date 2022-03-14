@@ -13,14 +13,21 @@ config = config.get_config()
 archive_error_f = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['error']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['error']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['error']),
+                os.path.join(config['paths']['mac_root_path']['storage04'], config['paths']['error']),
+
                 ]
 drop_folders = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['drop_folder']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['drop_folder']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['drop_folder']),
+                os.path.join(config['paths']['mac_root_path']['storage04'], config['paths']['drop_folder']),
                 ]
 archive_folders = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['archiving']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['archiving']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['archiving']),
+                os.path.join(config['paths']['mac_root_path']['storage04'], config['paths']['archiving']),
                 ]
 
 logger = logging.getLogger(__name__)
@@ -33,8 +40,7 @@ def get_archiving_list():
     archiving_list = []
     for x in archive_folders:
         alist = [d for d in os.listdir(x) 
-        if os.path.isdir(os.path.join(x, d)) and
-        not d.startswith(".")]
+        if not d.startswith(".")]
         archiving_list = archiving_list + alist
     return archiving_list
 
@@ -50,10 +56,10 @@ def archiving_check():
             archiving_list = get_archiving_list()
             alist_count = len(archiving_list)
 
-            if alist_count > 10: 
+            if alist_count > 15: 
 
                 if cycle_count == 0: 
-                    pause_msg = f"Folder Sets archiving: {alist_count}\n\
+                    pause_msg = f"Objects archiving: {alist_count}\n\
                                   Script will pause while archive queue clears."
                 elif (cycle_count%5 == 0
                     and cycle_count != 30):

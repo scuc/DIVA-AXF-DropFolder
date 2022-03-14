@@ -21,6 +21,8 @@ script_root = config['paths']['script_root']
 drop_folders = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['drop_folder']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['drop_folder']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['drop_folder']),
+                os.path.join(config['paths']['mac_root_path']['storage04'], config['paths']['drop_folder']),
                 ]
 
 logger = logging.getLogger(__name__)

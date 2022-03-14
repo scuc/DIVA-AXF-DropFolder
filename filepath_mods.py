@@ -16,6 +16,8 @@ config = config.get_config()
 archive_error_f = [
                 os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['error']), 
                 os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['error']),
+                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['error']),
+                os.path.join(config['paths']['mac_root_path']['storage04'], config['paths']['error']),
                 ]
 
 def check_pathname(path):
