@@ -4,7 +4,6 @@ import logging
 import os
 import re
 import shutil
-
 from pathlib import Path
 
 import config
@@ -14,17 +13,26 @@ logger = logging.getLogger(__name__)
 config = config.get_config()
 
 archive_error_f = [
-                os.path.join(config['paths']['mac_root_path']['storage01'], config['paths']['error']), 
-                os.path.join(config['paths']['mac_root_path']['storage02'], config['paths']['error']),
-                os.path.join(config['paths']['mac_root_path']['storage03'], config['paths']['error']),
-                os.path.join(config['paths']['mac_root_path']['storage04'], config['paths']['error']),
-                ]
+    os.path.join(
+        config["paths"]["mac_root_path"]["storage01"], config["paths"]["error"]
+    ),
+    os.path.join(
+        config["paths"]["mac_root_path"]["storage02"], config["paths"]["error"]
+    ),
+    os.path.join(
+        config["paths"]["mac_root_path"]["storage03"], config["paths"]["error"]
+    ),
+    os.path.join(
+        config["paths"]["mac_root_path"]["storage04"], config["paths"]["error"]
+    ),
+]
+
 
 def check_pathname(path):
     """
     Check each path recursively, and elminiate any illegal characters.
     """
-    #print("STARTING")
+    # print("STARTING")
     total_dir_change = 0
 
     while True:
@@ -35,19 +43,19 @@ def check_pathname(path):
             dir_chng_count = 0
 
             for root, dirs, files in os.walk(path):
-                
+
                 for name in dirs:
                     # print(f"DIRS:    {dirs}")
                     pathname = os.path.join(root, name)
                     dir_count += 1
                     cleanname = makeSafeName(root, name)
 
-                    if cleanname == False: 
+                    if cleanname == False:
                         name_err_msg = f"Error (E1) cleaning filename, moving to Archive_Error - {pathname}"
                         logger.info(name_err_msg)
                         move_to_archive_error(path)
                         return
-            
+
                     if len(cleanname) != len(name):
                         dir_chng_count += 1
                         continue
@@ -57,7 +65,7 @@ def check_pathname(path):
             if dir_chng_count != 0:
                 total_dir_change = dir_chng_count + total_dir_change
                 continue
-            else: 
+            else:
                 break
 
         except Exception as e:
@@ -65,9 +73,9 @@ def check_pathname(path):
             logger.error(dir_walk_msg)
             break
 
-    try: 
+    try:
         file_count = 0
-        ds_count = 0           
+        ds_count = 0
         file_chng_count = 0
         for root, dirs, files in os.walk(path):
             for name in files:
@@ -79,7 +87,7 @@ def check_pathname(path):
                     continue
                 else:
                     cleanname = makeSafeName(root, name)
-                    
+
                     if cleanname == False:
                         name_err_msg = f"Error(E2) cleaning filename, moving to Archive_Error - {pathname}"
                         logger.info(name_err_msg)
@@ -95,40 +103,63 @@ def check_pathname(path):
         file_walk_msg = f"Exception on FILE Walk: \n {e}"
         logger.error(file_walk_msg)
 
-
     total_dir_msg = f"{dir_count} sub-directories in project {os.path.basename(path)}"
-    total_files_msg = f"{file_count - ds_count} files in project {os.path.basename(path)}"
-    dir_name_change_msg = f"{total_dir_change} directory names changed to remove illegal characters."
-    file_name_change_msg = f"{file_chng_count} file names changed to remove illegal characters."
+    total_files_msg = (
+        f"{file_count - ds_count} files in project {os.path.basename(path)}"
+    )
+    dir_name_change_msg = (
+        f"{total_dir_change} directory names changed to remove illegal characters."
+    )
+    file_name_change_msg = (
+        f"{file_chng_count} file names changed to remove illegal characters."
+    )
     rm_msg = f"{ds_count} .DS_Store files removed from dir before archive."
-    
+
     logger.info(total_dir_msg)
     logger.info(total_files_msg)
     logger.info(dir_name_change_msg)
     logger.info(file_name_change_msg)
     logger.info(rm_msg)
-    return 
+    return
 
 
 def makeSafeName(root, name):
     """
-    Check a path name against a list of illegal characters, remove any found. 
+    Check a path name against a list of illegal characters, remove any found.
     """
 
-    illegalchars = ["@", ":", "*", "?", "!", '"', "'", "<", ">", "|", "&", "#", "%","$", "~", "+", "="]
+    illegalchars = [
+        "@",
+        ":",
+        "*",
+        "?",
+        "!",
+        '"',
+        "'",
+        "<",
+        ">",
+        "|",
+        "&",
+        "#",
+        "%",
+        "$",
+        "~",
+        "+",
+        "=",
+    ]
     remove_chars = [x for x in name if x in illegalchars]
 
-    try: 
+    try:
         # print("START MAKE SAFE")
-        if len(remove_chars) != 0: 
+        if len(remove_chars) != 0:
 
             cleanname = name.replace("&", "and")
             cleanname = cleanname.replace(":", "_")
             cleanname = cleanname.replace("=", "_")
             cleanname = "".join([x for x in cleanname if x not in illegalchars])
 
-            p = Path(os.path.join(root,name))
-            cleanp = Path(os.path.join(root,cleanname))
+            p = Path(os.path.join(root, name))
+            cleanp = Path(os.path.join(root, cleanname))
             p.rename(cleanp)
 
             pathname_msg = f"\n\
@@ -141,7 +172,9 @@ def makeSafeName(root, name):
             cleanname = name
 
     except Exception as e:
-        make_safe_msg = f"Exception raised on attempt to clean illegal characters: \n {e}"
+        make_safe_msg = (
+            f"Exception raised on attempt to clean illegal characters: \n {e}"
+        )
         print(f"EXCEPTION:   {e}  ")
         logger.error(make_safe_msg)
         cleanname = False
@@ -152,12 +185,10 @@ def makeSafeName(root, name):
 def move_to_archive_error(path):
     error_f = os.path.join(path[:28], "_AXF_Archive_ERROR/")
     shutil.move(path, error_f)
-    return 
+    return
 
 
-
-if __name__ == '__main__':
-    check_pathname("/Volumes/Quantum3/__Archive/_AXF_Archive_ERROR/88023_074995_BiteStingKill_MastersOfTheCoasts_EM_ALL_WAV")
-
-
-
+if __name__ == "__main__":
+    check_pathname(
+        "/Volumes/Quantum3/__Archive/_AXF_Archive_ERROR/88023_074995_BiteStingKill_MastersOfTheCoasts_EM_ALL_WAV"
+    )

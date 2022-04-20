@@ -1,13 +1,14 @@
 import logging
 import pprint
-import requests 
+
+import requests
 
 import config as cfg
 import get_authentication as auth
 
 config = cfg.get_config()
 
-url_core_manager = config['urls']['core_manager_api']
+url_core_manager = config["urls"]["core_manager_api"]
 
 logger = logging.getLogger(__name__)
 
@@ -26,53 +27,54 @@ def api_file_check(objectName):
         url_object_byobjectName = f"https://{url_core_manager}/objects/filesAndFolders"
 
         params = {
-                "objectName": objectName,
-                "collectionName": "AXF",
-                "listType":0,
-                "startIndex":1,
-                "batchSize":5,
-                }
+            "objectName": objectName,
+            "collectionName": "AXF",
+            "listType": 0,
+            "startIndex": 1,
+            "batchSize": 5,
+        }
 
         headers = {
-                "Accept": "application/json",
-                "Authorization": token,
-                }
-        
+            "Accept": "application/json",
+            "Authorization": token,
+        }
+
         db_check_msg = f"Checking DIVA DB for object name:  {objectName}"
         logger.debug(db_check_msg)
 
-        r = requests.get(url_object_byobjectName, headers=headers, params=params, verify=False)
-        
-        print("="*25)
+        r = requests.get(
+            url_object_byobjectName, headers=headers, params=params, verify=False
+        )
+
+        print("=" * 25)
         print(f"REQUEST URL: {r.request.url}")
         print(f"REQUEST BODY: {r.request.body}")
         print(f"REQUEST HEADERS: {r.request.headers}")
-        print("="*25)
+        print("=" * 25)
 
         response = r.json()
 
         code = r.status_code
         # print(f"============ {code} ==============")
-        print("RESPONSE:") 
-        pprint.pprint(response) 
-        print(f"STATUS_CODE: {code}") 
-        
+        print("RESPONSE:")
+        pprint.pprint(response)
+        print(f"STATUS_CODE: {code}")
+
         status_code_msg = f"DIVA DB Check returned a status code: {code}"
         logger.debug(status_code_msg)
-        
-        if str(code) == "404": 
+
+        if str(code) == "404":
             return False
         elif str(code) == "200":
             return True
-        else: 
+        else:
             return "error"
 
-
-    except Exception as e: 
+    except Exception as e:
         api_exception_msg = f"EXCEPTION raised on the DIVA DB check: \n {e} \n"
         logger.error(api_exception_msg)
         return "error"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     api_file_check(objectName="84418-84425_068441-068448_Dailies_20200116_D19_AM_PM")
