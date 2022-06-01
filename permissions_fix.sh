@@ -7,10 +7,14 @@
 # cd /Volumes/Quantum3/__Archive/_AXF_Archive_DropFolder
 cd $1
 sudo -u admin chflags nouchg ./
-sudo chmod -R 777 ./
-sudo chmod -RN ./
+sudo find ./ -name '.?*' -prune -o -exec chmod 777 {} +
+sudo find ./ -name '.?*' -prune -o -exec chmod -N {} +
 sudo chown -R 40006:50004 ./
-sudo xattr -rc ./
+sudo find ./ -name '.?*' -prune -o -exec xattr -c {} +
+
+# sudo chmod -R 777 ./
+# sudo chmod -RN ./
+# sudo xattr -rc ./
 
 # sudo -u admin -H sh -c "sh /path/to/myscript.sh"
 
