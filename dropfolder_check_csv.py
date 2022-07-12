@@ -6,59 +6,33 @@ import os
 import re
 import shutil
 import time
+
 from pathlib import Path, PureWindowsPath
 from sys import platform
 
+import config
 import api_DIVA as api
 import archive_queue as aqueue
 import check_dir_size as checksize
-import config
 import filepath_mods as fpmod
 import permissions_fix as permissions
 
 config = config.get_config()
 
-archive_error_f = [
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage01"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage02"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage03"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage04"], config["paths"]["error"]
-    ),
-]
-archive_f_win = [  # diva servers are Win, use UNC to view files.
-    config["paths"]["win_archive"]["storage01"],
-    config["paths"]["win_archive"]["storage02"],
-    config["paths"]["win_archive"]["storage03"],
-    config["paths"]["win_archive"]["storage04"],
-]
+script_root = config["paths"]["script_root"]
+mac_root_folders = config["paths"]["mac_root_path"]
 drop_folders = [
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage01"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage02"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage03"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage04"], config["paths"]["drop_folder"]
-    ),
+    os.path.join(x, config["paths"]["drop_folder"]) for x in mac_root_folders
 ]
+archive_error_f = [os.path.join(x, config["paths"]["error"]) for x in mac_root_folders]
+archive_folders = [
+    os.path.join(x, config["paths"]["archiving"]) for x in mac_root_folders
+]
+# diva servers are Win, use UNC to view files.
+archive_f_win = config["paths"]["win_archive"]
+
 obj_category = config["DIVA_Obj_Category"]
-source_dest = [
-    config["DIVA_Source_Dest"]["storage01"],
-    config["DIVA_Source_Dest"]["storage02"],
-    config["DIVA_Source_Dest"]["storage03"],
-    config["DIVA_Source_Dest"]["storage04"],
-]
+source_dest = config["DIVA_Source_Dest"]
 
 
 logger = logging.getLogger(__name__)
@@ -152,6 +126,7 @@ def create_csv():
             and f not in ["_archiving", "_incomplete"]
             and f.endswith(".mov")
             or f.endswith(".mxf")
+            or f.endswith(".xml")
         ]
 
         archive_list = dir_list + file_list

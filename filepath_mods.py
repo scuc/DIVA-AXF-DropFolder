@@ -2,8 +2,8 @@
 
 import logging
 import os
-import re
 import shutil
+
 from pathlib import Path
 
 import config
@@ -12,20 +12,9 @@ logger = logging.getLogger(__name__)
 
 config = config.get_config()
 
-archive_error_f = [
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage01"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage02"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage03"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage04"], config["paths"]["error"]
-    ),
-]
+script_root = config["paths"]["script_root"]
+mac_root_folders = config["paths"]["mac_root_path"]
+archive_error_f = [os.path.join(x, config["paths"]["error"]) for x in mac_root_folders]
 
 
 def check_pathname(path):
@@ -157,6 +146,12 @@ def makeSafeName(root, name):
             cleanname = cleanname.replace(":", "_")
             cleanname = cleanname.replace("=", "_")
             cleanname = "".join([x for x in cleanname if x not in illegalchars])
+
+            if cleanname[-1] == " ":
+                cleanname = cleanname.rstrip()
+                logger.info(
+                    f"Empty character(s) removed from the end of filename: {cleanname}"
+                )
 
             p = Path(os.path.join(root, name))
             cleanp = Path(os.path.join(root, cleanname))

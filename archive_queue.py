@@ -2,56 +2,22 @@
 
 import logging
 import os
-import shutil
 import time
 
-import check_dir_size as checksize
 import config
-import filepath_mods as fpmod
 
 config = config.get_config()
-archive_error_f = [
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage01"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage02"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage03"], config["paths"]["error"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage04"], config["paths"]["error"]
-    ),
-]
+
+script_root = config["paths"]["script_root"]
+mac_root_folders = config["paths"]["mac_root_path"]
 drop_folders = [
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage01"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage02"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage03"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage04"], config["paths"]["drop_folder"]
-    ),
+    os.path.join(x, config["paths"]["drop_folder"]) for x in mac_root_folders
 ]
+archive_error_f = [os.path.join(x, config["paths"]["error"]) for x in mac_root_folders]
 archive_folders = [
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage01"], config["paths"]["archiving"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage02"], config["paths"]["archiving"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage03"], config["paths"]["archiving"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage04"], config["paths"]["archiving"]
-    ),
+    os.path.join(x, config["paths"]["archiving"]) for x in mac_root_folders
 ]
+
 
 logger = logging.getLogger(__name__)
 

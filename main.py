@@ -4,11 +4,11 @@
 import logging
 import logging.config
 import os
-from datetime import datetime
-from sys import platform
-from time import localtime, strftime
-
 import yaml
+
+from datetime import datetime
+from time import localtime, strftime
+from sys import platform
 
 import config
 import dropfolder_check_csv as dfc
@@ -16,21 +16,10 @@ import permissions_fix as permissions
 
 config = config.get_config()
 
-
 script_root = config["paths"]["script_root"]
+mac_root_folders = config["paths"]["mac_root_path"]
 drop_folders = [
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage01"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage02"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage03"], config["paths"]["drop_folder"]
-    ),
-    os.path.join(
-        config["paths"]["mac_root_path"]["storage04"], config["paths"]["drop_folder"]
-    ),
+    os.path.join(x, config["paths"]["drop_folder"]) for x in mac_root_folders
 ]
 
 logger = logging.getLogger(__name__)
