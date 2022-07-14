@@ -253,7 +253,7 @@ def dedup_list(archive_list, date, dropfolder, index):
     for d in archive_list:
         try:
             archive_object = os.path.join(dropfolder, d)
-            duplicate = api.api_file_check(d)
+            duplicate = api.file_check(d)
 
             if duplicate == True:
                 duplicates.append(d)
