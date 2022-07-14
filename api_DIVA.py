@@ -16,7 +16,7 @@ source_destinations = config["DIVA_Source_Dest"]
 logger = logging.getLogger(__name__)
 
 
-def api_file_check(objectName):
+def file_check(objectName):
     """
     Use the DIVA REST API to check object against the DB to see if it already exists
     Status Code 200 = object found in DIVA DB
@@ -79,7 +79,7 @@ def api_file_check(objectName):
         return "error"
 
 
-def api_get_requests(startDateTime):
+def get_requests(startDateTime):
     """
     Check DIVA to count the list of archive requests processed since 00:00:00 on the current day.
     The request is submitted with UTC time, and local server is eastern time, for the startDateTime
@@ -99,6 +99,13 @@ def api_get_requests(startDateTime):
             "sortDirection": "ASC",
             "type": "Archive",
             "startDateTime": {startDateTime},
+            "states": [
+                "Running",
+                "Waiting for resources",
+                "Waiting for operator",
+                "Pending",
+                "Transferring",
+            ],
             "collectionName": "AXF",
         }
 
@@ -113,9 +120,9 @@ def api_get_requests(startDateTime):
 
         r = requests.get(url_requests, headers=headers, params=params, verify=False)
         response = r.json()
-        pprint.pprint(response)
-        print("")
-        print("")
+        # pprint.pprint(response)
+        # print("")
+        # print("")
         json_data = json_normalize(response)
         data = json_data["requests"][0]
         df = pd.DataFrame(
@@ -131,7 +138,6 @@ def api_get_requests(startDateTime):
                 "statusDescription",
             ],
         )
-        print(df)
         return df
 
     except Exception as e:
@@ -141,5 +147,5 @@ def api_get_requests(startDateTime):
 
 
 if __name__ == "__main__":
-    # api_file_check(objectName="84418-84425_068441-068448_Dailies_20200116_D19_AM_PM")
-    api_get_requests(startDateTime="2022-07-13 05:00:00")
+    # file_check(objectName="84418-84425_068441-068448_Dailies_20200116_D19_AM_PM")
+    get_requests(startDateTime="2022-07-14 00:00:00")
