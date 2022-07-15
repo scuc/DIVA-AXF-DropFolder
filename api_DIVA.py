@@ -115,7 +115,6 @@ def get_requests(startDateTime):
         }
 
         db_check_msg = f"Checking DIVA DB for archive requests"
-
         logger.info(db_check_msg)
 
         r = requests.get(url_requests, headers=headers, params=params, verify=False)
