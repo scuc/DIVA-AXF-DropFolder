@@ -6,14 +6,13 @@ import os
 import re
 import shutil
 import time
-
 from pathlib import Path, PureWindowsPath
 from sys import platform
 
-import config
 import api_DIVA as api
 import archive_queue as aqueue
 import check_dir_size as checksize
+import config
 import filepath_mods as fpmod
 import permissions_fix as permissions
 
@@ -109,7 +108,7 @@ def create_csv():
         else:
             archive_f_windows = archive_f_win[index]
 
-        df_delimiter_msg = f"\n\n====================== DROP FOLDER: {volume_name} =========================\n\\"
+        df_delimiter_msg = f"\n\n====================== DROP FOLDER: {volume_name} =========================\n\n"
         logger.info(df_delimiter_msg)
 
         dir_list = [

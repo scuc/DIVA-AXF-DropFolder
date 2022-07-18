@@ -16,7 +16,7 @@ def chmod_chown(drop_f):
     logger.info(start_msg)
     for folder in drop_f:
         try:
-            if "Isilon2" in folder.split("\\"):
+            if "Isilon2" in folder.split("/"):
                 continue
             else:
                 os.chdir(script_root)
