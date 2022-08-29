@@ -11,6 +11,7 @@ from time import localtime, strftime
 from sys import platform
 
 import config
+import check_root_paths as crp
 import dropfolder_check_csv as dfc
 import permissions_fix as permissions
 
@@ -68,18 +69,24 @@ def main():
 
     logger.info(start_msg)
 
-    if platform == "darwin":
-        p = permissions.chmod_chown(drop_folders)
+    root_paths = crp.check_root_paths()
+
+    if root_paths is not False: 
+        dfc.create_csv()
     else:
-        p = None
+        pass
+
+
+    # if platform == "darwin":
+    #     p = permissions.chmod_chown(drop_folders)
+    # else:
+    #     p = None
 
     # if (p != "error"
     #     or platform != "darwin"):
     #     dfc.create_csv()
     # else:
     #     pass
-
-    dfc.create_csv()
 
     date_end = str(strftime("%A, %d. %B %Y %I:%M%p", localtime()))
 
