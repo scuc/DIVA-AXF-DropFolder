@@ -71,22 +71,22 @@ def main():
 
     root_paths = crp.check_root_paths()
 
-    if root_paths is not False: 
-        dfc.create_csv()
-    else:
-        pass
-
-
-    # if platform == "darwin":
-    #     p = permissions.chmod_chown(drop_folders)
-    # else:
-    #     p = None
-
-    # if (p != "error"
-    #     or platform != "darwin"):
+    # if root_paths is not False: 
     #     dfc.create_csv()
     # else:
     #     pass
+
+
+    if platform == "darwin" and root_paths is not False:
+        p = permissions.chmod_chown(drop_folders)
+    else:
+        p = None
+
+    if (p != "error"
+        or platform != "darwin"):
+        dfc.create_csv()
+    else:
+        pass
 
     date_end = str(strftime("%A, %d. %B %Y %I:%M%p", localtime()))
 

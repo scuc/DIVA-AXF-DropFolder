@@ -12,8 +12,10 @@ def check_dir_size(dpath):
     Walk the dir of a potential archive and check to make sure the dir is not growing. 
     If so, wait 5 seconds and check again, if not return and create the .csv file. 
     size_value: 
-    0 = Object is not growing, proceed
+    0 = Object measured at size 0, move on.
     1 = Object is growing, and has exceeded wait time, move on. 
+    2 = Object size is > 0 and size is not growing, ready for archive. 
+    3 = Error encountered measuring dir size. 
     """
     checked_size = 0
     total_size = 0
@@ -24,7 +26,13 @@ def check_dir_size(dpath):
 
     while True:
         try: 
-            checked_size = os.path.getsize(dpath)
+            checked_size = get_directory_size(dpath)
+
+            if checked_size == 0:
+                size_value = 0
+                logger.info("Size value for dir measured as 0, skipping dir.")
+                return size_value
+
             if checked_size != total_size:
                 total_size = checked_size
                 
@@ -59,8 +67,10 @@ def check_dir_size(dpath):
                 notgrowing_msg = f"{os.path.basename(dpath)}  is ready for archive. End of size check."
                 logger.info(chk_count_msg)
                 logger.info(notgrowing_msg)
-                log_sizecheck_msg(dpath, checked_size, total_size)
-                size_value = 0
+                formatted_checked_size = get_size_format(checked_size)
+                formatted_total_size = get_size_format(total_size)
+                log_sizecheck_msg(dpath, formatted_checked_size, formatted_total_size)
+                size_value = 2
                 break
 
         except Exception as e:
@@ -72,15 +82,52 @@ def check_dir_size(dpath):
     return size_value
 
 
-def log_sizecheck_msg(dpath, checked_size, total_size):
+def get_directory_size(directory):
+    """Returns the `directory` size in bytes."""
+    total = 0
+    try:
+        # print("[+] Getting the size of", directory)
+        for entry in os.scandir(directory):
+            if entry.is_file():
+                # if it's a file, use stat() function
+                total += entry.stat().st_size
+            elif entry.is_dir():
+                # if it's a directory, recursively call this function
+                try:
+                    total += get_directory_size(entry.path)
+                except FileNotFoundError:
+                    pass
+    except NotADirectoryError:
+        # if `directory` isn't a directory, get the file size then
+        return os.path.getsize(directory)
+    except PermissionError:
+        # if for whatever reason we can't open the folder, return 0
+        return 0
+    return total
+
+
+def get_size_format(b, factor=1024, suffix="B"):
+    """
+    Scale bytes to its proper byte format
+    e.g:
+        1253656 => '1.20MB'
+        1253656678 => '1.17GB'
+    """
+    for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
+        if b < factor:
+            return f"{b:.2f}{unit}{suffix}"
+        b /= factor
+    return f"{b:.2f}Y{suffix}"
+
+
+def log_sizecheck_msg(dpath, formatted_checked_size, formatted_total_size):
     size_chk_msg = f"\n\
     ================================================================\n\
                 Checking Size for: {os.path.basename(dpath)}\n\
-                Total Dir Size at Start: {checked_size}\n\
-                Total Dir Size at Finish: {total_size}\n\
+                Total Dir Size at Start: {formatted_checked_size}\n\
+                Total Dir Size at Finish: {formatted_total_size}\n\
     ================================================================\
     "
-    print(size_chk_msg)
     logger.info(size_chk_msg)
     return
 

@@ -48,15 +48,15 @@ def create_csv():
 
     csv_count, f = get_csv_count()
     counter = 0
-    while csv_count != 0 and counter < 10:
-        csv_msg = f"Counter:{counter}, CSV file still present in {f}, pausing script for 300sec."
+    while csv_count != 0 and counter < 1:
+        csv_msg = f"Counter:{counter}, CSV file still present in {f}, pausing script for 60sec."
         logger.info(csv_msg)
-        time.sleep(300)
+        time.sleep(60)
         counter += 1
         csv_count = get_csv_count()
 
-        if len(csv_count) != 0 and counter == 10:
-            csv_msg = f"Counter:{counter}, CSV file still present in {f} after 50min, overwriting existing CSV."
+        if len(csv_count) != 0 and counter == 1:
+            csv_msg = f"Counter:{counter}, CSV file still present in {f} after 5min, overwriting existing CSV."
             logger.info(csv_msg)
 
             for drop_f in drop_folders:
@@ -137,10 +137,12 @@ def create_csv():
             continue
 
         else:
+            archive_list = archive_list[:10]  # only take 10 at a time,
+            # avoid scenario when 1000's of dir dropped
             t = time.time()
             date = time.strftime("%Y%m%d%H%M", time.localtime(t))
             dedup_dlist = dedup_list(archive_list, date, dropfolder, index)
-            csv_doc = f"{date}_diva.csv"
+            csv_doc = f"{date}_{volume_name}.csv"
 
             dlist_msg = f"New directories for archiving: {dedup_dlist}"
             logger.info(dlist_msg)
@@ -158,7 +160,7 @@ def create_csv():
                 dpath = os.path.join(dropfolder, d)
                 dir_value = checksize.check_dir_size(dpath)
 
-                if dir_value == 1:
+                if dir_value == 0 or dir_value == 1:
                     continue
 
                 fpath = fpmod.check_pathname(dpath)
