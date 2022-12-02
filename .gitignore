@@ -147,3 +147,5 @@ _old_configs/*
 NOTES_SetUp_and_Config.txt
 NOTES_SetUp_and_Config.txt
 _unused/*
+test.py
+test_datetime.py
