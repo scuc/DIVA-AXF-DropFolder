@@ -9,9 +9,10 @@ import time
 from pathlib import Path, PureWindowsPath
 from sys import platform
 
+import check_obj_size as checksize
+
 import api_DIVA as api
 import archive_queue as aqueue
-import check_dir_size as checksize
 import config
 import filepath_mods as fpmod
 import permissions_fix as permissions
@@ -29,6 +30,7 @@ archive_folders = [
 ]
 # diva servers are Win, use UNC to view files.
 archive_f_win = config["paths"]["win_archive"]
+duplicate_object_dir = config["paths"]["duplicates"]
 
 obj_category = config["DIVA_Obj_Category"]
 source_dest = config["DIVA_Source_Dest"]
@@ -116,6 +118,7 @@ def create_csv():
             for d in os.listdir(dropfolder)
             if os.path.isdir(os.path.join(dropfolder, d))
             and d not in ["_archiving", "_incomplete"]
+            and checksize.check_obj_size(os.path.join(dropfolder, d)) != 0
         ]
 
         file_list = [
@@ -158,7 +161,7 @@ def create_csv():
             count = 0
             for d in dedup_dlist:
                 dpath = os.path.join(dropfolder, d)
-                dir_value = checksize.check_dir_size(dpath)
+                dir_value = checksize.check_obj_size(dpath)
 
                 if dir_value == 0 or dir_value == 1:
                     continue
@@ -277,13 +280,22 @@ def dedup_list(archive_list, date, dropfolder, index):
     duplicates_msg = f"Duplicates detected: {duplicates}"
     logger.info(duplicates_msg)
 
-    dup_rename(duplicates, date, dropfolder)
+    renamed_obj_list = dup_rename(duplicates, date, dropfolder)
+
+    for arch_obj_dt in renamed_obj_list:
+        shutil.move(
+            os.path.join(dropfolder, arch_obj_dt),
+            os.path.join(mac_root_folders[index], duplicate_object_dir, arch_obj_dt),
+        )
+        obj_mv_msg = f"Duplicate object, moved out of dropfolder:  {arch_obj_dt}"
+        logger.info(obj_mv_msg)
 
     return dedup_dlist
 
 
 def dup_rename(duplicates, date, dropfolder):
     # if dir by the same name already exisits in DIVA, append dir name with datetime stamp.
+    renamed_obj_list = []
     try:
         for dup in duplicates:
             archive_object = os.path.join(dropfolder, dup)
@@ -298,6 +310,10 @@ def dup_rename(duplicates, date, dropfolder):
                 os.rename(archive_object, arch_obj_dt)
                 obj_rename_msg = f"Duplicate object, renamed:  {arch_obj_dt}"
                 logger.info(obj_rename_msg)
+
+            renamed_obj_list.append(os.path.basename(arch_obj_dt))
+
+        return renamed_obj_list
 
     except Exception as e:
         rename_excp_msg = f"\n\
