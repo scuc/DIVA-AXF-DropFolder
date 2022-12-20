@@ -3,10 +3,10 @@
 import logging
 import os
 import shutil
-
 from pathlib import Path
 
 import config
+from check_obj_size import get_object_size as get_size
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,11 @@ def check_pathname(path):
             for name in files:
                 pathname = os.path.join(root, name)
                 file_count += 1
-                if pathname.endswith(".DS_Store"):
+                if (
+                    name.startswith(".DS_Store")
+                    or name.startswith("._")
+                    and os.stat(pathname).st_size < 5000
+                ):
                     os.remove(pathname)
                     ds_count += 1
                     continue
@@ -102,7 +106,7 @@ def check_pathname(path):
     file_name_change_msg = (
         f"{file_chng_count} file names changed to remove illegal characters."
     )
-    rm_msg = f"{ds_count} .DS_Store files removed from dir before archive."
+    rm_msg = f"{ds_count} .DS_Store or ._ files removed from dir before archive."
 
     logger.info(total_dir_msg)
     logger.info(total_files_msg)
@@ -178,12 +182,10 @@ def makeSafeName(root, name):
 
 
 def move_to_archive_error(path):
-    error_f = os.path.join(path[:28], "_AXF_Archive_ERROR/")
+    error_f = os.path.join(path[:28], "_Archive_ERROR/")
     shutil.move(path, error_f)
     return
 
 
 if __name__ == "__main__":
-    check_pathname(
-        "/Volumes/Quantum3/__Archive/_AXF_Archive_ERROR/88023_074995_BiteStingKill_MastersOfTheCoasts_EM_ALL_WAV"
-    )
+    check_pathname("")

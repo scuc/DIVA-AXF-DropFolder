@@ -21,9 +21,7 @@ def check_obj_size(dpath):
     total_size = 0
     check_count = 0
 
-    begin_size_chk_msg = (
-        f"Checking to see if object is still growing for:  {os.path.basename(dpath)}"
-    )
+    begin_size_chk_msg = f"Size Check for:  {os.path.basename(dpath)}"
     logger.info(begin_size_chk_msg)
 
     while True:
@@ -32,7 +30,7 @@ def check_obj_size(dpath):
 
             if checked_size == 0:
                 size_value = 0
-                logger.info("Size value for dir measured as 0, skipping dir.")
+                logger.info("Size measured as 0, skipping dir.")
                 return size_value
 
             if checked_size != total_size:
@@ -132,4 +130,4 @@ def log_sizecheck_msg(dpath, formatted_checked_size, formatted_total_size):
 
 
 if __name__ == "__main__":
-    check_obj_size("/Volumes/Quantum3/__Archive/_AXF_Archive_ERROR/88023_074995_GFX")
+    check_obj_size("")

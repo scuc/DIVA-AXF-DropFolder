@@ -9,10 +9,9 @@ import time
 from pathlib import Path, PureWindowsPath
 from sys import platform
 
-import check_obj_size as checksize
-
 import api_DIVA as api
 import archive_queue as aqueue
+import check_obj_size as checksize
 import config
 import filepath_mods as fpmod
 import permissions_fix as permissions
@@ -83,14 +82,14 @@ def create_csv():
     """
     for each watch folder, create a list of directories present, check to see
     if the same directories are not already present in _archiving and
-    _incomplete. 
+    _incomplete and a size larger than 0 KB.
     """
     index = 0
     for dropfolder in drop_folders:
 
         source_destination = source_dest[index]
 
-        if source_destination == "Isilon2_AXF_Archive":
+        if source_destination == "Isilon2_Archive":
             volume_name = dropfolder[9:16]
         else:
             volume_name = dropfolder[9:17]
@@ -98,9 +97,9 @@ def create_csv():
         check_df_msg = f"Checking drop folder on: {volume_name}"
         logger.info(check_df_msg)
 
-        if source_destination == "Isilon2_AXF_Archive":
+        if source_destination == "Isilon2_Archive":
             archive_f_windows = PureWindowsPath(
-                archive_f_win[index], "\\__Archive\\_AXF_Archive_DropFolder\\_archiving"
+                archive_f_win[index], "\\__Archive\\_Archive_DropFolder\\_archiving"
             )
             print(" ")
             print("=" * 30)
@@ -118,7 +117,6 @@ def create_csv():
             for d in os.listdir(dropfolder)
             if os.path.isdir(os.path.join(dropfolder, d))
             and d not in ["_archiving", "_incomplete"]
-            and checksize.check_obj_size(os.path.join(dropfolder, d)) != 0
         ]
 
         file_list = [
@@ -166,9 +164,7 @@ def create_csv():
                 if dir_value == 0 or dir_value == 1:
                     continue
 
-                fpath = fpmod.check_pathname(dpath)
-
-                if dir_value == 3:
+                elif dir_value == 3:
                     oserror_msg = f"OSError found, likely illegal characters, unable to correct, moving to ERROR folder."
                     logger.error(oserror_msg)
                     shutil.move(
@@ -176,6 +172,7 @@ def create_csv():
                     )
 
                 else:
+                    fpmod.check_pathname(dpath)
                     if count == 0:
                         csv_writer.writerow(
                             [
