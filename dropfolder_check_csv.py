@@ -97,17 +97,7 @@ def create_csv():
         check_df_msg = f"Checking drop folder on: {volume_name}"
         logger.info(check_df_msg)
 
-        if source_destination == "Isilon2_Archive":
-            archive_f_windows = PureWindowsPath(
-                archive_f_win[index], "\\__Archive\\_Archive_DropFolder\\_archiving"
-            )
-            print(" ")
-            print("=" * 30)
-            print(archive_f_windows)
-            print("=" * 30)
-            print(" ")
-        else:
-            archive_f_windows = archive_f_win[index]
+        archive_f_windows = archive_f_win[index]
 
         df_delimiter_msg = f"\n\n====================== DROP FOLDER: {volume_name} =========================\n\n"
         logger.info(df_delimiter_msg)
@@ -130,15 +120,32 @@ def create_csv():
         ]
 
         archive_list = dir_list + file_list
+        print(f"ARCHIVE LIST: {archive_list}")
 
         if len(archive_list) == 0:
-            empty_msg = f"{dropfolder[9:17]} = No new dir for archiving."
+            empty_msg = f"{volume_name} = No new dir for archiving."
             logger.info(empty_msg)
             index += 1
             continue
 
         else:
-            archive_list = archive_list[:10]  # only take 10 at a time,
+            try:
+                archive_list_size_checked = []
+                for x in archive_list:
+                    dpath = os.path.join(dropfolder, x)
+                    total_size = checksize.get_object_size(dpath)
+                    if total_size == 0:
+                        logger.info(
+                            f"Total filesize for {x} measured as 0. Removing from archive_list."
+                        )
+                        continue
+                    else:
+                        archive_list_size_checked.append(x)
+
+            except Exception as e:
+                logger.error(f"Exception raised on total size check: \n{e}")
+
+            archive_list = archive_list_size_checked[:10]  # only take 10 at a time,
             # avoid scenario when 1000's of dir dropped
             t = time.time()
             date = time.strftime("%Y%m%d%H%M", time.localtime(t))
@@ -238,6 +245,7 @@ def get_csv_count():
         os.chdir(f)
         csv = glob.glob("*.csv", recursive=False)
         csv_count += len(csv)
+        logger.info(f"CSV count for {f.split('/')[2]} is {csv_count}.")
         if csv_count != 0:
             return csv_count, f
         else:

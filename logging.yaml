@@ -18,7 +18,7 @@ handlers:
         formatter: simple
         filename: /Users/admin/Scripts/DIVA_DropFolder/_logs/info.log
         # maxBytes: 10485760 # 10MB
-        when: 'midnight'
+        when: "midnight"
         backupCount: 20
         encoding: utf8
 
@@ -28,7 +28,7 @@ handlers:
         formatter: simple
         filename: /Users/admin/Scripts/DIVA_DropFolder/_logs/errors.log
         # maxBytes: 10485760 # 10MB
-        when: 'midnight'
+        when: "midnight"
         backupCount: 20
         encoding: utf8
 
@@ -42,5 +42,3 @@ root:
     level: DEBUG
     handlers: [console, info_file_handler, error_file_handler]
     propogate: yes
-
-        
