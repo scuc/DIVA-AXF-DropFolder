@@ -1,12 +1,12 @@
 import json
-import os
 import logging
+import os
 import pprint
 import shutil
 import time
 
-import config as cfg
 import api_DIVA as api
+import config as cfg
 
 config = cfg.get_config()
 
@@ -19,6 +19,14 @@ obj_category = config["DIVA_Obj_Category"]
 source_dest = config["DIVA_Source_Dest"]
 
 logger = logging.getLogger(__name__)
+
+
+###############################################################################################
+######  NOTE: This Script is set up to run as a stand alone procedure, operating on a    ######
+######  serparate schedule from the main.py archiving script. the execution is schedule  ######
+######  controlled by the launchd file: py.script.checkDivaObjects.plist                 ######
+######  it runs 4x times a day, every 6 hours.                                           ######
+################################################################################################
 
 
 def get_archived_objects():
@@ -42,7 +50,9 @@ def get_archived_objects():
         check_df_msg = f"Checking archive folder on: {volume_name}"
         logger.info(check_df_msg)
 
-        df_delimiter_msg = f"\n\n=============== ARCHIVE FOLDER: {volume_name} ==================\n\n"
+        df_delimiter_msg = (
+            f"\n\n=============== ARCHIVE FOLDER: {volume_name} ==================\n\n"
+        )
         logger.info(df_delimiter_msg)
         print(df_delimiter_msg)
 
@@ -75,23 +85,28 @@ def get_archived_objects():
         else:
             duplicate_list = []
             unique_list = []
-            try: 
-                for objname in archive_list:
-                    status = api.file_check(objname)
-                    if status is True: 
-                        duplicate_list.append(objname)
-                        delete_obj(archivefolder, objname)
+            for objectName in archive_list:
+                try:
+                    status = api.file_check(objectName)
+                    tapeInstances = api.get_object_info(objectName)
+                    if status is True and tapeInstances == 1:
+                        duplicate_list.append(objectName)
+                        delete_obj(archivefolder, objectName)
                     else:
-                        unique_list.append(objname)
-                duplicate_dict.update({volume_name: duplicate_list})
-                unique_dict.update({volume_name: unique_list })
+                        unique_list.append(objectName)
+                except Exception as e:
+                    logger.error(f"Exception on db check: \n{e}")
 
-            except Exception as e: 
-                logger.error(f"Exception on db check: \n{e}")
+            duplicate_dict.update({volume_name: duplicate_list})
+            unique_dict.update({volume_name: unique_list})
 
     t = time.time()
     date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t))
-    combined_dict = {"datestamp": date, "DUPLICATES": duplicate_dict, "UNIQUE": unique_dict }
+    combined_dict = {
+        "datestamp": date,
+        "DUPLICATES": duplicate_dict,
+        "UNIQUE": unique_dict,
+    }
     # print(combined_dict)
 
     os.chdir(root_path)
@@ -106,19 +121,19 @@ def get_archived_objects():
         f.close
 
 
-def delete_obj(archivefolder, objname):
+def delete_obj(archivefolder, objectName):
 
-    path = os.path.join(archivefolder, objname)
+    path = os.path.join(archivefolder, objectName)
     isdir = os.path.isdir(path)
     isfile = os.path.isfile(path)
 
-    print(objname, isdir, isfile)
+    print(objectName, isdir, isfile)
 
-    if isdir is True: 
+    if isdir is True:
         shutil.rmtree(path)
-    elif isfile is True: 
+    elif isfile is True:
         os.remove(path)
-    else: 
+    else:
         print(f"UNABLE TO DETERMINE OBJ TYPE- DIR or FILE")
 
     return
