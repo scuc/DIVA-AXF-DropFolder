@@ -1,3 +1,4 @@
+import json
 import logging
 import pprint
 
@@ -31,7 +32,7 @@ def file_check(objectName):
 
         params = {
             "objectName": objectName,
-            "collectionName": "AXF",
+            "collectionName": "LTFS",
             "listType": 0,
             "startIndex": 1,
             "batchSize": 5,
@@ -49,19 +50,19 @@ def file_check(objectName):
             url_object_byobjectName, headers=headers, params=params, verify=False
         )
 
-        print("=" * 25)
-        print(f"REQUEST URL: {r.request.url}")
-        print(f"REQUEST BODY: {r.request.body}")
-        print(f"REQUEST HEADERS: {r.request.headers}")
-        print("=" * 25)
+        # print("=" * 25)
+        # print(f"REQUEST URL: {r.request.url}")
+        # print(f"REQUEST BODY: {r.request.body}")
+        # print(f"REQUEST HEADERS: {r.request.headers}")
+        # print("=" * 25)
 
         response = r.json()
 
         code = r.status_code
         # print(f"============ {code} ==============")
-        print("RESPONSE:")
-        pprint.pprint(response)
-        print(f"STATUS_CODE: {code}")
+        # print("RESPONSE:")
+        # pprint.pprint(response)
+        # print(f"STATUS_CODE: {code}")
 
         status_code_msg = f"DIVA DB Check returned a status code: {code}"
         logger.debug(status_code_msg)
@@ -77,6 +78,53 @@ def file_check(objectName):
         api_exception_msg = f"Exception raised on the DIVA DB check: \n {e} \n"
         logger.error(api_exception_msg)
         return "error"
+
+
+def get_object_info(objectName):
+    """
+    400 = Invalid object supplied
+    404 = Object not found
+    """
+
+    try:
+        token = auth.get_auth()
+        url = f"https://{url_core_manager}/objects/info"
+
+        params = {
+            "objectName": objectName,
+            "collectionName": "LTFS",
+        }
+
+        headers = {
+            "Accept": "application/json",
+            "Authorization": token,
+        }
+
+        db_check_msg = f"Checking object info for:  {objectName}"
+        logger.debug(db_check_msg)
+
+        r = requests.get(url, headers=headers, params=params, verify=False)
+
+        print(r.status_code)
+        response = r.json()
+        logger.debug(f"Status Code = {r.status_code}")
+
+        if r.status_code == 200:
+            tapeInstances = len(response["tapeInstances"])
+        elif r.status_code == 404:
+            tapeInstances = 0
+        else:
+            tapeInstances = -1
+
+        logger.info(f"tapeInstances = {tapeInstances}")
+        print(tapeInstances)
+        return tapeInstances
+
+    except Exception as e:
+        api_exception_msg = f"Exception raised on fileInfo check for: \n {e} \n"
+        logger.error(api_exception_msg)
+        tapeInstances = -1
+        return tapeInstances
 
 
 def get_requests(startDateTime):
@@ -106,7 +154,7 @@ def get_requests(startDateTime):
                 "Pending",
                 "Transferring",
             ],
-            "collectionName": "AXF",
+            "collectionName": "LTFS",
         }
 
         headers = {
@@ -147,4 +195,5 @@ def get_requests(startDateTime):
 
 if __name__ == "__main__":
     # file_check(objectName="84418-84425_068441-068448_Dailies_20200116_D19_AM_PM")
-    get_requests(startDateTime="2022-07-14 00:00:00")
+    # get_requests(startDateTime="2022-07-14 00:00:00")
+    get_object_info(objectName="")
