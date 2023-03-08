@@ -104,8 +104,8 @@ def get_archived_objects():
     date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t))
     combined_dict = {
         "datestamp": date,
-        "DUPLICATES": duplicate_dict,
-        "UNIQUE": unique_dict,
+        "ARCHIVED": duplicate_dict,
+        "UNARCHIVED": unique_dict,
     }
     # print(combined_dict)
 
