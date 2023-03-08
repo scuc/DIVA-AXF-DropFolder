@@ -1,0 +1,25 @@
+{
+    "logs": []
+}
+// EXAMPLE: check for "ARCHIVED" on storage (objects written to LTO tape) in each 
+// watchfolder location (Quantum2, Quantum3, Quantum4, Isilon2). also lists "UNARCHIVED" on
+// storage (objects not yet written to LTO tape). Archived objects get deleted from local storage.
+// {
+//     "logs": [
+//         {
+//             "datestamp": "2023-03-08 00:00:31",
+//             "ARCHIVED": {
+//                 "Quantum2": [],
+//                 "Quantum3": [],
+//                 "Quantum4": [],
+//                 "Isilon2/": []
+//             },
+//             "UNARCHIVED": {
+//                 "Quantum2": [],
+//                 "Quantum3": [],
+//                 "Quantum4": [],
+//                 "Isilon2/": []
+//             }
+//         },
+//     ]
+// }
