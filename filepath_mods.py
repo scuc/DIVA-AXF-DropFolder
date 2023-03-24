@@ -2,6 +2,7 @@
 
 import logging
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -66,6 +67,8 @@ def check_pathname(path):
         file_count = 0
         ds_count = 0
         file_chng_count = 0
+        validation_result = 0
+
         for root, dirs, files in os.walk(path):
             for name in files:
                 pathname = os.path.join(root, name)
@@ -92,6 +95,15 @@ def check_pathname(path):
                     else:
                         pass
 
+                    if len(os.path.join(root, cleanname)) > 255:
+                        illegal_path = os.path.join(root, cleanname)
+                        logger.info(
+                            f"Too many characters for Windows path (>255): \n {illegal_path} "
+                        )
+                        validation_result = 1
+                    else:
+                        pass
+
     except Exception as e:
         file_walk_msg = f"Exception on FILE Walk: \n {e}"
         logger.error(file_walk_msg)
@@ -113,7 +125,8 @@ def check_pathname(path):
     logger.info(dir_name_change_msg)
     logger.info(file_name_change_msg)
     logger.info(rm_msg)
-    return
+
+    return validation_result
 
 
 def makeSafeName(root, name):
@@ -146,23 +159,22 @@ def makeSafeName(root, name):
         # print("START MAKE SAFE")
         if len(remove_chars) != 0:
 
-            cleanname = name.replace("&", "and")
+            cleanname = name.replace("&", "_and_")
             cleanname = cleanname.replace(":", "_")
             cleanname = cleanname.replace("=", "_")
             cleanname = "".join([x for x in cleanname if x not in illegalchars])
 
-            if cleanname[-1] == " ":
-                cleanname = cleanname.rstrip()
-                logger.info(
-                    f"Empty character(s) removed from the end of filename: {cleanname}"
-                )
+            # remove leading and trailing all whitespace and count number of subs
+            cleanname = re.subn(r"^\s+|\s+$", "", cleanname)
+            sub_count = cleanname[1]
 
             p = Path(os.path.join(root, name))
-            cleanp = Path(os.path.join(root, cleanname))
+            cleanp = Path(os.path.join(root, cleanname[0]))
             p.rename(cleanp)
 
             pathname_msg = f"\n\
             {remove_chars} - illegal characters removed from pathname.\n\
+            {sub_count} - whitespace characters removed from head and tail \n\
             name:     {name} \n\
             clean name:     {cleanname} \n "
             logger.info(pathname_msg)

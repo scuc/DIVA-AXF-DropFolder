@@ -3,18 +3,15 @@ import csv
 import glob
 import logging
 import os
-import re
 import shutil
 import time
-from pathlib import Path, PureWindowsPath
-from sys import platform
+from pathlib import Path
 
 import api_DIVA as api
 import archive_queue as aqueue
 import check_obj_size as checksize
 import config
 import filepath_mods as fpmod
-import permissions_fix as permissions
 
 config = config.get_config()
 
@@ -171,15 +168,23 @@ def create_csv():
                 if dir_value == 0 or dir_value == 1:
                     continue
 
+                elif dir_value == 2:
+                    validation_result = fpmod.check_pathname(dpath)
+                    if validation_result != 0:
+                        logger.info(
+                            "Windows filepath too long, moving project to Error Dir"
+                        )
+                        shutil.move(dpath, archive_error_f[index])
+                        continue
+                    else:
+                        pass
+
                 elif dir_value == 3:
                     oserror_msg = f"OSError found, likely illegal characters, unable to correct, moving to ERROR folder."
                     logger.error(oserror_msg)
-                    shutil.move(
-                        dpath,
-                    )
+                    shutil.move(dpath, archive_error_f[index])
 
                 else:
-                    fpmod.check_pathname(dpath)
                     if count == 0:
                         csv_writer.writerow(
                             [
