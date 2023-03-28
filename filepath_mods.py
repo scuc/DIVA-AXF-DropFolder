@@ -6,10 +6,8 @@ import re
 import shutil
 from collections import Counter
 from pathlib import Path
-from string import whitespace
 
 import config
-from check_obj_size import get_object_size as get_size
 
 logger = logging.getLogger(__name__)
 
