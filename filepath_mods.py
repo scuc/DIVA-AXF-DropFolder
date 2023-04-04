@@ -177,27 +177,33 @@ def makeSafeName(root, name):
         "~",
         "+",
         "=",
+        "'",
+        '"',
     ]
     illegal_char_count = len([x for x in name if x in illegalchars])
 
     try:
-        # remove leading and trailing all whitespace and count number of subs
-        cleanname = re.subn(r"^\s+|\s+$", "", name)
-        whitespace_count = cleanname[1]
-
-        p = Path(os.path.join(root, name))
-        cleanp = Path(os.path.join(root, cleanname[0]))
-        p.rename(cleanp)
+        # regex to match on:
+        # leading and trailing all whitespace
+        # period preceding "/" or at the end of a path
+        # remove matches and count number of subs
+        cleanname_re = re.subn(r"(\s+/|/\s+|\.$)", "", name)
+        cleanname = cleanname_re[0]
+        whitespace_count = int(cleanname_re[1])
 
         if illegal_char_count != 0:
-
-            cleanname = name.replace("&", "_and_")
+            cleanname = cleanname.replace("&", "_and_")
             cleanname = cleanname.replace(":", "_")
             cleanname = cleanname.replace("=", "_")
-            cleanname = "".join([x for x in cleanname if x not in illegalchars])
+            sub = re.subn(f"(@|\*|\?|!|<|>|&|#|%|\$|~|\+)", "_", cleanname)
+            cleanname = "".join([x for x in sub[0] if x not in illegalchars])
+
+            p = Path(os.path.join(root, name))
+            cleanp = Path(os.path.join(root, cleanname))
+            p.rename(cleanp)
 
         else:
-            cleanname = name
+            pass
 
     except Exception as e:
         make_safe_msg = (
@@ -210,7 +216,7 @@ def makeSafeName(root, name):
 
         pathname_msg = f"\n\
         {illegal_char_count} - illegal characters removed from pathname.\n\
-        {whitespace_count} - whitespace characters removed from head and tail \n\
+        {whitespace_count} - characters removed from head and tail \n\
         name:  {name} \n\
         clean name:  {cleanname} \n "
         logger.info(pathname_msg)
@@ -229,12 +235,16 @@ def makeSafeName(root, name):
 def move_to_archive_error(path):
     error_f = os.path.join(path[:28], "_Archive_ERROR/")
     shutil.move(path, error_f)
+    path_err_msg = f"{Path(path).name} moved to Archive Error location."
+    logger.info(path_err_msg)
     return
 
 
 def move_to_archive_zip(path):
     req_zip_f = os.path.join(path[:28], "_Archive_REQ_ZIP")
     shutil.move(path, req_zip_f)
+    path_zip_msg = f"{Path(path).name} moved to REQ_ZIP location."
+    logger.info(path_zip_msg)
     return
 
 
