@@ -1,4 +1,6 @@
 #! /usr/bin/env python3
+
+
 import logging
 import logging.config
 import os
@@ -17,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 def check_root_paths():
-
     root_folders = []
 
     for volume in mac_root_folders:

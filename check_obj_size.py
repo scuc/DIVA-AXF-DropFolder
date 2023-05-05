@@ -43,7 +43,6 @@ def check_obj_size(dpath):
             chk_count_msg = f"Check Count = {check_count}"
 
             if total_size != checked_size and check_count < 3:
-
                 logger.info(chk_count_msg)
                 logger.info(growing_msg)
                 logger.info(pause_msg)

@@ -48,7 +48,6 @@ def archiving_check():
             archive_jobs = api.get_requests(startDateTime)
 
             if len(archive_jobs) > 15:
-
                 if cycle_count == 0:
                     pause_msg = f"Objects archiving: {archive_jobs}\n\
                                   Script will pause while archive queue clears."

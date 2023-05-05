@@ -29,9 +29,9 @@ def get_auth():
         response = r.json()
         code = r.status_code
         token = response["token"]
-        print(f"RESPONSE: {response}")
-        print(f"STATUS_CODE: {code}")
-        print(f"TOKEN:  {token}")
+        # print(f"RESPONSE: {response}")
+        # print(f"STATUS_CODE: {code}")
+        # print(f"TOKEN:  {token}")
 
         return token
 

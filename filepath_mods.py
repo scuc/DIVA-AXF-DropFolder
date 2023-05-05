@@ -36,7 +36,6 @@ def check_pathname(path):
             dir_chng_count = 0
 
             for root, dirs, files in os.walk(path):
-
                 for name in dirs:
                     pathname = os.path.join(root, name)
                     dir_count += 1
@@ -187,21 +186,21 @@ def makeSafeName(root, name):
         # leading and trailing all whitespace
         # period preceding "/" or at the end of a path
         # remove matches and count number of subs
-        cleanname_re = re.subn(r"(\s+/|/\s+|\.$)", "", name)
+
+        sub = re.subn(f"(@|\*|\?|!|<|>|&|#|%|\$|~|\+)", "_", name)
+        cleanname = "".join([x for x in sub[0] if x not in illegalchars])
+        cleanname = cleanname.replace("&", "_and_")
+        cleanname = cleanname.replace(":", "_")
+        cleanname = cleanname.replace("=", "_")
+        cleanname_re = re.subn(r"(\s+/|/\s+|\.$)", "", cleanname)
         cleanname = cleanname_re[0]
         whitespace_count = int(cleanname_re[1])
 
-        if illegal_char_count != 0:
-            cleanname = cleanname.replace("&", "_and_")
-            cleanname = cleanname.replace(":", "_")
-            cleanname = cleanname.replace("=", "_")
-            sub = re.subn(f"(@|\*|\?|!|<|>|&|#|%|\$|~|\+)", "_", cleanname)
-            cleanname = "".join([x for x in sub[0] if x not in illegalchars])
+        p = Path(os.path.join(root, name))
+        cleanp = Path(os.path.join(root, cleanname))
 
-            p = Path(os.path.join(root, name))
-            cleanp = Path(os.path.join(root, cleanname))
+        if p != cleanp:
             p.rename(cleanp)
-
         else:
             pass
 
@@ -213,7 +212,6 @@ def makeSafeName(root, name):
         cleanname = False
 
     if illegal_char_count > 0 or whitespace_count > 0:
-
         pathname_msg = f"\n\
         {illegal_char_count} - illegal characters removed from pathname.\n\
         {whitespace_count} - characters removed from head and tail \n\
