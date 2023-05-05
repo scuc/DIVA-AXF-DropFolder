@@ -82,7 +82,7 @@ def main():
         p = None
 
     if p != "error" or platform != "darwin":
-        dfc.create_csv()
+        dfc.dropfolder_check()
     else:
         pass
 

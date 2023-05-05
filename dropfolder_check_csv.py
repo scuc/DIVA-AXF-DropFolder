@@ -44,30 +44,22 @@ def create_csv():
     the DIVA archive job.
     """
 
-    csv_count, f = get_csv_count()
-    counter = 0
-    while csv_count != 0 and counter < 1:
-        csv_msg = f"Counter:{counter}, CSV file still present in {f}, pausing script for 60sec."
-        logger.info(csv_msg)
-        time.sleep(60)
-        counter += 1
-        csv_count = get_csv_count()
-
-        if len(csv_count) != 0 and counter == 1:
-            csv_msg = f"Counter:{counter}, CSV file still present in {f} after 5min, overwriting existing CSV."
+    for f in drop_folders:
+        csv_count = get_csv_count(f)
+        counter = 0
+        while csv_count != 0 and counter < 1:
+            csv_msg = f"Counter:{counter}, CSV file still present in {f}, pausing script for 60sec."
             logger.info(csv_msg)
+            time.sleep(60)
+            counter += 1
+            csv_count = get_csv_count(f)
 
-            for drop_f in drop_folders:
-                for f in Path(drop_f).glob("*.csv"):
-                    try:
-                        f.unlink()
-                        csv_del_msg = f"old csv deleted: {f}"
-                        logger.info(csv_del_msg)
-                    except OSError as e:
-                        unlink_error_msg = (
-                            f"Error Removeing old .CSV: {f}: {e.strerror}"
-                        )
-                        logger.error(unlink_error_msg)
+            if csv_count != 0 and counter == 5:
+                csv_msg = f"Counter:{counter}, CSV file still present in {f} after 5min, removing existing CSV."
+                logger.info(csv_msg)
+                csv_cleanup(f)
+            else:
+                continue
 
     queue_status = aqueue.archiving_check()
 
@@ -83,7 +75,6 @@ def create_csv():
     """
     index = 0
     for dropfolder in drop_folders:
-
         source_destination = source_dest[index]
 
         if source_destination == "Isilon2_Archive":
@@ -114,6 +105,8 @@ def create_csv():
             and f.endswith(".mov")
             or f.endswith(".mxf")
             or f.endswith(".xml")
+            or f.endswith(".tar")
+            or f.endswith(".zip")
         ]
 
         archive_list = dir_list + file_list
@@ -130,12 +123,17 @@ def create_csv():
                 archive_list_size_checked = []
                 for x in archive_list:
                     dpath = os.path.join(dropfolder, x)
-                    total_size = checksize.get_object_size(dpath)
-                    if total_size == 0:
-                        logger.info(
-                            f"Total filesize for {x} measured as 0. Removing from archive_list."
-                        )
-                        continue
+                    if (
+                        source_destination != "Isilon2_Archive"
+                    ):  # size check does not work on Isilon2
+                        total_size = checksize.get_object_size(dpath)
+                        if total_size == 0:
+                            logger.info(
+                                f"Total filesize for {x} measured as 0. Removing from archive_list."
+                            )
+                            continue
+                        else:
+                            archive_list_size_checked.append(x)
                     else:
                         archive_list_size_checked.append(x)
 
@@ -168,23 +166,19 @@ def create_csv():
                 if dir_value == 0 or dir_value == 1:
                     continue
 
-                elif dir_value == 2:
-                    validation_result = fpmod.check_pathname(dpath)
-                    if validation_result != 0:
-                        logger.info(
-                            "Windows filepath too long, moving project to Error Dir"
-                        )
-                        shutil.move(dpath, archive_error_f[index])
-                        continue
-                    else:
-                        pass
-
                 elif dir_value == 3:
                     oserror_msg = f"OSError found, likely illegal characters, unable to correct, moving to ERROR folder."
                     logger.error(oserror_msg)
-                    shutil.move(dpath, archive_error_f[index])
+                    shutil.move(
+                        dpath,
+                    )
 
                 else:
+                    validation_result = fpmod.check_pathname(dpath)
+
+                    if validation_result == 1:
+                        continue
+
                     if count == 0:
                         csv_writer.writerow(
                             [
@@ -237,25 +231,38 @@ def create_csv():
             )
             logger.info(move_msg)
 
-            """
-            PUT NEW FUNCTION CALL HERE dfc.dropfolder_update
-            """
-
         index += 1
 
 
-def get_csv_count():
-    csv_count = 0
-    for f in drop_folders:
-        os.chdir(f)
-        csv = glob.glob("*.csv", recursive=False)
-        csv_count += len(csv)
-        logger.info(f"CSV count for {f.split('/')[2]} is {csv_count}.")
-        if csv_count != 0:
-            return csv_count, f
-        else:
-            continue
-    return csv_count, f
+def get_csv_count(f):
+    os.chdir(f)
+    csv_watchf = glob.glob("*.csv", recursive=False)
+
+    os.chdir(os.path.join(f, "_archiving"))
+    csv_archivingf = glob.glob("*.csv", recursive=False)
+
+    csv_count = len(csv_watchf) + len(csv_archivingf)
+    logger.info(f"CSV count for {f.split('/')[2]} is {csv_count}.")
+
+    return csv_count
+
+
+def csv_cleanup(drop_f):
+    try:
+        dropf_path = Path(drop_f).glob("*.csv")
+        archiving_path = Path(drop_f, "_archiving").glob("*.csv")
+        csv_paths = dropf_path + archiving_path
+
+        for f in csv_paths:
+            f.unlink()
+            csv_del_msg = f"csv deleted from drop folder: {f}"
+            logger.info(csv_del_msg)
+
+        return
+
+    except OSError as e:
+        unlink_error_msg = f"Error Removeing old .CSV: {f}: {e.strerror}"
+        logger.error(unlink_error_msg)
 
 
 def dedup_list(archive_list, date, dropfolder, index):
@@ -292,13 +299,13 @@ def dedup_list(archive_list, date, dropfolder, index):
 
     renamed_obj_list = dup_rename(duplicates, date, dropfolder)
 
-    for arch_obj_dt in renamed_obj_list:
-        shutil.move(
-            os.path.join(dropfolder, arch_obj_dt),
-            os.path.join(mac_root_folders[index], duplicate_object_dir, arch_obj_dt),
-        )
-        obj_mv_msg = f"Duplicate object, moved out of dropfolder:  {arch_obj_dt}"
-        logger.info(obj_mv_msg)
+    # for arch_obj_dt in renamed_obj_list:
+    #     shutil.move(
+    #         os.path.join(dropfolder, arch_obj_dt),
+    #         os.path.join(mac_root_folders[index], duplicate_object_dir, arch_obj_dt),
+    #     )
+    #     obj_mv_msg = f"Duplicate object, moved out of dropfolder:  {arch_obj_dt}"
+    #     logger.info(obj_mv_msg)
 
     return dedup_dlist
 
@@ -363,4 +370,4 @@ def move_to_checkin(movelist, dropfolder):
 
 
 if __name__ == "__main__":
-    create_csv()
+    get_csv_count()
