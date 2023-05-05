@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 import logging
 import os
 import re
@@ -32,7 +30,7 @@ def check_pathname(path):
     while True:
         try:
             dir_count = 0
-            dir_chng = False
+            # dir_chng = False
             dir_chng_count = 0
 
             for root, dirs, files in os.walk(path):
@@ -44,7 +42,8 @@ def check_pathname(path):
                     cleanname_total.update(cleanname_totals)
 
                     if cleanname == False:
-                        name_err_msg = f"Error (E1) cleaning filename, moving to Archive_Error - {pathname}"
+                        name_err_msg = f"Error (E1) cleaning filename, moving to \
+                                         Archive_Error - {pathname}"
                         logger.info(name_err_msg)
                         move_to_archive_error(path)
                         return
@@ -90,8 +89,9 @@ def check_pathname(path):
 
                     cleanname_total.update(cleanname_totals)
 
-                    if cleanname == False:
-                        name_err_msg = f"Error(E2) cleaning filename, moving to Archive_Error - {pathname}"
+                    if cleanname is False:
+                        name_err_msg = f"Error(E2) cleaning filename, moving to\
+                                         Archive_Error - {pathname}"
                         logger.info(name_err_msg)
                         move_to_archive_error(path)
                         return
@@ -103,7 +103,8 @@ def check_pathname(path):
 
                     if len(os.path.join(root, cleanname)) > 255:
                         illegal_path = os.path.join(root, cleanname)
-                        char_limit_msg = f"Too many characters for Windows path (>255): \n {illegal_path} "
+                        char_limit_msg = f"Too many characters for Windows path (>255):\
+                                           {illegal_path} "
                         logger.info(char_limit_msg)
                         write_path_to_txt(path, illegal_path)
                         validation_result = 1
@@ -136,7 +137,8 @@ def check_pathname(path):
     illegal_chars_msg = (
         f"{cleanname_total['illegal_char_count']} illegal characters were found."
     )
-    whitespace_msg = f"{cleanname_total['whitespace_count']} whitespace characters removed from filenames."
+    whitespace_msg = f"{cleanname_total['whitespace_count']} whitespace characters \
+                        removed from filenames."
     rm_msg = f"{ds_count} .DS_Store or ._ files removed from dir before archive."
 
     logger.info(total_dir_msg)
@@ -187,7 +189,7 @@ def makeSafeName(root, name):
         # period preceding "/" or at the end of a path
         # remove matches and count number of subs
 
-        sub = re.subn(f"(@|\*|\?|!|<|>|&|#|%|\$|~|\+)", "_", name)
+        sub = re.subn("(@|\*|\?|!|<|>|&|#|%|\$|~|\+)", "_", name)
         cleanname = "".join([x for x in sub[0] if x not in illegalchars])
         cleanname = cleanname.replace("&", "_and_")
         cleanname = cleanname.replace(":", "_")

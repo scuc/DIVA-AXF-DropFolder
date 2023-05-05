@@ -20,12 +20,12 @@ source_dest = config["DIVA_Source_Dest"]
 logger = logging.getLogger(__name__)
 
 
-###############################################################################################
-######  NOTE: This Script is set up to run as a stand alone procedure, operating on a    ######
-######  serparate schedule from the main.py archiving script. the execution is schedule  ######
-######  controlled by the launchd file: py.script.checkDivaObjects.plist                 ######
-######  it runs 4x times a day, every 6 hours.                                           ######
-################################################################################################
+##########################################################################
+#  NOTE: This Script is set up to run as a stand alone procedure,
+#  operating on aserparate schedule from the main.py archiving script.
+#  the execution is schedule controlled by the launchd file: plist
+#  py.script.checkDivaObjects. it runs 4x times a day, every 6 hours.
+##########################################################################
 
 
 def get_archived_objects():
@@ -38,7 +38,6 @@ def get_archived_objects():
     unique_dict = {}
     index = 0
     for archivefolder in archive_folders:
-
         source_destination = source_dest[index]
 
         if source_destination == "Isilon2_Archive":
@@ -121,7 +120,6 @@ def get_archived_objects():
 
 
 def delete_obj(archivefolder, objectName):
-
     path = os.path.join(archivefolder, objectName)
     isdir = os.path.isdir(path)
     isfile = os.path.isfile(path)
@@ -133,7 +131,7 @@ def delete_obj(archivefolder, objectName):
     elif isfile is True:
         os.remove(path)
     else:
-        print(f"UNABLE TO DETERMINE OBJ TYPE- DIR or FILE")
+        print("UNABLE TO DETERMINE OBJ TYPE- DIR or FILE")
 
     return
 

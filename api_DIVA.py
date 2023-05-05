@@ -48,19 +48,9 @@ def file_check(objectName):
             url_object_byobjectName, headers=headers, params=params, verify=False
         )
 
-        # print("=" * 25)
-        # print(f"REQUEST URL: {r.request.url}")
-        # print(f"REQUEST BODY: {r.request.body}")
-        # print(f"REQUEST HEADERS: {r.request.headers}")
-        # print("=" * 25)
-
-        response = r.json()
+        # response = r.json()
 
         code = r.status_code
-        # print(f"============ {code} ==============")
-        # print("RESPONSE:")
-        # pprint.pprint(response)
-        # print(f"STATUS_CODE: {code}")
 
         status_code_msg = f"DIVA DB Check returned a status code: {code}"
         logger.debug(status_code_msg)
@@ -127,13 +117,15 @@ def get_object_info(objectName):
 
 def get_requests(startDateTime):
     """
-    Check DIVA to count the list of archive requests processed since 00:00:00 on the current day.
-    The request is submitted with UTC time, and local server is eastern time, for the startDateTime
-    is actually "05:00:00" to compensate.
+    Check DIVA to count the list of archive requests processed since 00:00:00
+    on the current day.
+    The request is submitted with UTC time, and local server is eastern time,
+    for the startDateTime is actually "05:00:00" to compensate.
 
     EXAMPLE FULL RESPONSE:
     {'id': 292865, 'abortReason': {'code': 0, 'description': '', 'name': 'DIVA_AR_NONE'
-    }, 'additionalInfo': '<?xml version="1.0" encoding="UTF-8"?>\n<ADDITIONAL_INFO xmlns="http://www.fpdigital.com/divarchive/additionalInfoRequestInfo/v1.0"></ADDITIONAL_INFO>', 'completionDate': 1657682357, 'currentPriority': 66, 'destinationTape': '183375', 'objectName': 'NBLZ89604_LifeBelowZero_ShadowDwellers_2997p_AIR.mov', 'progress': 100, 'sourceTape': ' ', 'stateCode': 3, 'stateName': 'DIVA_COMPLETED', 'stateDescription': 'Completed', 'submissionDate': 1657681383, 'type': 'DIVA_ARCHIVE_REQUEST', 'typeDescription': 'Archive', 'typeCode': 0, 'statusCode': 1000, 'statusDescription': 'success', 'statusName': 'DIVA_OK', 'collectionName': 'AXF'
+    }, 'additionalInfo': '<?xml version="1.0" encoding="UTF-8"?>\n
+    <ADDITIONAL_INFO xmlns="http://www.fpdigital.com/divarchive/additionalInfoRequestInfo/v1.0"></ADDITIONAL_INFO>', 'completionDate': 1657682357, 'currentPriority': 66, 'destinationTape': '183375', 'objectName': 'NBLZ89604_LifeBelowZero_ShadowDwellers_2997p_AIR.mov', 'progress': 100, 'sourceTape': ' ', 'stateCode': 3, 'stateName': 'DIVA_COMPLETED', 'stateDescription': 'Completed', 'submissionDate': 1657681383, 'type': 'DIVA_ARCHIVE_REQUEST', 'typeDescription': 'Archive', 'typeCode': 0, 'statusCode': 1000, 'statusDescription': 'success', 'statusName': 'DIVA_OK', 'collectionName': 'AXF'
     }
     """
     try:
@@ -160,7 +152,7 @@ def get_requests(startDateTime):
             "Authorization": token,
         }
 
-        db_check_msg = f"Checking DIVA DB for archive requests"
+        db_check_msg = "Checking DIVA DB for archive requests"
         logger.info(db_check_msg)
 
         r = requests.get(url_requests, headers=headers, params=params, verify=False)

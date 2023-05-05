@@ -48,14 +48,16 @@ def create_csv():
         csv_count = get_csv_count(f)
         counter = 0
         while csv_count != 0 and counter < 1:
-            csv_msg = f"Counter:{counter}, CSV file still present in {f}, pausing script for 60sec."
+            csv_msg = f"Counter:{counter}, CSV file still present in {f}, \
+                pausing script for 60sec."
             logger.info(csv_msg)
             time.sleep(60)
             counter += 1
             csv_count = get_csv_count(f)
 
             if csv_count != 0 and counter == 5:
-                csv_msg = f"Counter:{counter}, CSV file still present in {f} after 5min, removing existing CSV."
+                csv_msg = f"Counter:{counter}, CSV file still present in {f} after 5min,\
+                      removing existing CSV."
                 logger.info(csv_msg)
                 csv_cleanup(f)
             else:
@@ -129,7 +131,8 @@ def create_csv():
                         total_size = checksize.get_object_size(dpath)
                         if total_size == 0:
                             logger.info(
-                                f"Total filesize for {x} measured as 0. Removing from archive_list."
+                                f"Total filesize for {x} measured as 0. \
+                                    Removing from archive_list."
                             )
                             continue
                         else:
@@ -167,7 +170,8 @@ def create_csv():
                     continue
 
                 elif dir_value == 3:
-                    oserror_msg = f"OSError found, likely illegal characters, unable to correct, moving to ERROR folder."
+                    oserror_msg = f"OSError found, likely illegal characters, \
+                        unable to correct, moving to ERROR folder."
                     logger.error(oserror_msg)
                     shutil.move(
                         dpath,
@@ -191,7 +195,8 @@ def create_csv():
                         )
 
                     if count == 3:
-                        max_count_msg = f"Maximum number of submissions reached for this archive cycle."
+                        max_count_msg = "Maximum number of submissions reached for\
+                            this archive cycle."
                         logger.info(max_count_msg)
                         break
 
@@ -297,7 +302,7 @@ def dedup_list(archive_list, date, dropfolder, index):
     duplicates_msg = f"Duplicates detected: {duplicates}"
     logger.info(duplicates_msg)
 
-    renamed_obj_list = dup_rename(duplicates, date, dropfolder)
+    # renamed_obj_list = dup_rename(duplicates, date, dropfolder)
 
     # for arch_obj_dt in renamed_obj_list:
     #     shutil.move(
@@ -311,7 +316,8 @@ def dedup_list(archive_list, date, dropfolder, index):
 
 
 def dup_rename(duplicates, date, dropfolder):
-    # if dir by the same name already exisits in DIVA, append dir name with datetime stamp.
+    # if dir by the same name already exisits in DIVA,
+    # append dir name with datetime stamp.
     renamed_obj_list = []
     try:
         for dup in duplicates:

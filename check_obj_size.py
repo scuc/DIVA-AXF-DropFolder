@@ -39,7 +39,7 @@ def check_obj_size(dpath):
             check_count += 1
 
             growing_msg = f"Size still growing for:  {os.path.basename(dpath)}"
-            pause_msg = f"Waiting 10 seconds to remeasure size."
+            pause_msg = "Waiting 10 seconds to remeasure size."
             chk_count_msg = f"Check Count = {check_count}"
 
             if total_size != checked_size and check_count < 3:
@@ -53,14 +53,16 @@ def check_obj_size(dpath):
 
             elif total_size != checked_size and check_count == 3:
                 size_value = 1
-                count_end_msg = f"{os.path.basename(dpath)} - object still growing after 90sec, moving to next object for archive."
+                count_end_msg = f"{os.path.basename(dpath)} - object still growing \
+                    after 90sec, moving to next object for archive."
                 logger.info(chk_count_msg)
                 logger.info(count_end_msg)
                 log_sizecheck_msg(dpath, checked_size, total_size)
                 break
 
             elif total_size == checked_size and check_count > 1:
-                notgrowing_msg = f"{os.path.basename(dpath)}  is ready for archive. End of size check."
+                notgrowing_msg = f"{os.path.basename(dpath)}  is ready for archive. \
+                    End of size check."
                 logger.info(chk_count_msg)
                 logger.info(notgrowing_msg)
                 formatted_checked_size = get_size_format(checked_size)

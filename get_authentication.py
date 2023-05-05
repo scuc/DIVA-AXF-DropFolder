@@ -27,11 +27,8 @@ def get_auth():
         headers = {"Accept": "application/json"}
         r = requests.post(url_user_login, headers=headers, json=json, verify=False)
         response = r.json()
-        code = r.status_code
+        # code = r.status_code
         token = response["token"]
-        # print(f"RESPONSE: {response}")
-        # print(f"STATUS_CODE: {code}")
-        # print(f"TOKEN:  {token}")
 
         return token
 
