@@ -1,6 +1,3 @@
-#! /usr/bin/env python3
-
-
 import logging
 import logging.config
 import os
@@ -30,7 +27,8 @@ def set_logger():
     """
     Setup logging configuration
     """
-    path = os.path.join(script_root, "logging.yaml")
+    # path = os.path.join(script_root, "logging.yaml")
+    path = "./logging.yaml"
 
     with open(path, "rt") as f:
         config = yaml.safe_load(f.read())
