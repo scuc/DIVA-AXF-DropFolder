@@ -1,4 +1,6 @@
+import json
 import logging
+import pprint
 
 import pandas as pd
 import requests
@@ -48,9 +50,19 @@ def file_check(objectName):
             url_object_byobjectName, headers=headers, params=params, verify=False
         )
 
-        # response = r.json()
+        # print("=" * 25)
+        # print(f"REQUEST URL: {r.request.url}")
+        # print(f"REQUEST BODY: {r.request.body}")
+        # print(f"REQUEST HEADERS: {r.request.headers}")
+        # print("=" * 25)
+
+        response = r.json()
 
         code = r.status_code
+        # print(f"============ {code} ==============")
+        # print("RESPONSE:")
+        # pprint.pprint(response)
+        # print(f"STATUS_CODE: {code}")
 
         status_code_msg = f"DIVA DB Check returned a status code: {code}"
         logger.debug(status_code_msg)
@@ -91,15 +103,17 @@ def get_object_info(objectName):
         db_check_msg = f"Checking object info for:  {objectName}"
         logger.debug(db_check_msg)
 
-        r = requests.get(url, headers=headers, params=params, verify=False)
+        r = requests.get(
+            url, headers=headers, params=params, verify=False
+        )
 
         print(r.status_code)
         response = r.json()
         logger.debug(f"Status Code = {r.status_code}")
 
-        if r.status_code == 200:
+        if r.status_code == 200: 
             tapeInstances = len(response["tapeInstances"])
-        elif r.status_code == 404:
+        elif r.status_code == 404: 
             tapeInstances = 0
         else:
             tapeInstances = -1
@@ -117,15 +131,13 @@ def get_object_info(objectName):
 
 def get_requests(startDateTime):
     """
-    Check DIVA to count the list of archive requests processed since 00:00:00
-    on the current day.
-    The request is submitted with UTC time, and local server is eastern time,
-    for the startDateTime is actually "05:00:00" to compensate.
+    Check DIVA to count the list of archive requests processed since 00:00:00 on the current day.
+    The request is submitted with UTC time, and local server is eastern time, for the startDateTime
+    is actually "05:00:00" to compensate.
 
     EXAMPLE FULL RESPONSE:
     {'id': 292865, 'abortReason': {'code': 0, 'description': '', 'name': 'DIVA_AR_NONE'
-    }, 'additionalInfo': '<?xml version="1.0" encoding="UTF-8"?>\n
-    <ADDITIONAL_INFO xmlns="http://www.fpdigital.com/divarchive/additionalInfoRequestInfo/v1.0"></ADDITIONAL_INFO>', 'completionDate': 1657682357, 'currentPriority': 66, 'destinationTape': '183375', 'objectName': 'NBLZ89604_LifeBelowZero_ShadowDwellers_2997p_AIR.mov', 'progress': 100, 'sourceTape': ' ', 'stateCode': 3, 'stateName': 'DIVA_COMPLETED', 'stateDescription': 'Completed', 'submissionDate': 1657681383, 'type': 'DIVA_ARCHIVE_REQUEST', 'typeDescription': 'Archive', 'typeCode': 0, 'statusCode': 1000, 'statusDescription': 'success', 'statusName': 'DIVA_OK', 'collectionName': 'AXF'
+    }, 'additionalInfo': '<?xml version="1.0" encoding="UTF-8"?>\n<ADDITIONAL_INFO xmlns="http://www.fpdigital.com/divarchive/additionalInfoRequestInfo/v1.0"></ADDITIONAL_INFO>', 'completionDate': 1657682357, 'currentPriority': 66, 'destinationTape': '183375', 'objectName': 'NBLZ89604_LifeBelowZero_ShadowDwellers_2997p_AIR.mov', 'progress': 100, 'sourceTape': ' ', 'stateCode': 3, 'stateName': 'DIVA_COMPLETED', 'stateDescription': 'Completed', 'submissionDate': 1657681383, 'type': 'DIVA_ARCHIVE_REQUEST', 'typeDescription': 'Archive', 'typeCode': 0, 'statusCode': 1000, 'statusDescription': 'success', 'statusName': 'DIVA_OK', 'collectionName': 'AXF'
     }
     """
     try:
@@ -152,7 +164,7 @@ def get_requests(startDateTime):
             "Authorization": token,
         }
 
-        db_check_msg = "Checking DIVA DB for archive requests"
+        db_check_msg = f"Checking DIVA DB for archive requests"
         logger.info(db_check_msg)
 
         r = requests.get(url_requests, headers=headers, params=params, verify=False)
@@ -184,6 +196,4 @@ def get_requests(startDateTime):
 
 
 if __name__ == "__main__":
-    # file_check(objectName="84418-84425_068441-068448_Dailies_20200116_D19_AM_PM")
-    # get_requests(startDateTime="2022-07-14 00:00:00")
     get_object_info(objectName="")

@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import os
-
 import yaml
 
 
@@ -9,15 +8,16 @@ def get_config():
     """
     Setup configuration and credentials
     """
-    path = "config.yaml"
+    path =  ''
 
-    with open(path, "rt") as f:
+    with open(path, 'rt') as f:
         config = yaml.safe_load(f.read())
 
     return config
 
 
 def ensure_dirs():
+
     dirs = ["_logs"]
 
     for dir in dirs:
@@ -27,5 +27,5 @@ def ensure_dirs():
     return
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     get_config()

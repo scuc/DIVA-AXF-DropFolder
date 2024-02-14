@@ -17,6 +17,7 @@ config = config.get_config()
 
 script_root = config["paths"]["script_root"]
 mac_root_folders = config["paths"]["mac_root_path"]
+csv_archive_dropfolder = config["paths"]["csv_dropfolder"]
 drop_folders = [
     os.path.join(x, config["paths"]["drop_folder"]) for x in mac_root_folders
 ]
@@ -44,22 +45,22 @@ def create_csv():
     the DIVA archive job.
     """
 
-    for f in drop_folders:
-        csv_count = get_csv_count(f)
-        counter = 0
-        while csv_count != 0 and counter < 1:
-            csv_msg = f"Counter:{counter}, CSV file still present in {f}, pausing script for 60sec."
-            logger.info(csv_msg)
-            time.sleep(60)
-            counter += 1
-            csv_count = get_csv_count(f)
+    # for f in drop_folders: 
+    #     csv_count = get_csv_count(f)
+    #     counter = 0
+    #     while csv_count != 0 and counter < 1:
+    #         csv_msg = f"Counter:{counter}, CSV file still present in {f}, pausing script for 60sec."
+    #         logger.info(csv_msg)
+    #         time.sleep(60)
+    #         counter += 1
+    #         csv_count = get_csv_count(f)
 
-            if csv_count != 0 and counter == 5:
-                csv_msg = f"Counter:{counter}, CSV file still present in {f} after 5min, removing existing CSV."
-                logger.info(csv_msg)
-                csv_cleanup(f)
-            else:
-                continue
+    #         if csv_count != 0 and counter == 5:
+    #             csv_msg = f"Counter:{counter}, CSV file still present in {f} after 5min, removing existing CSV."
+    #             logger.info(csv_msg)
+    #             csv_cleanup(f)
+    #         else:
+    #             continue
 
     queue_status = aqueue.archiving_check()
 
@@ -74,13 +75,20 @@ def create_csv():
     _incomplete and a size larger than 0 KB.
     """
     index = 0
+    t = time.time()
+    date = time.strftime("%Y%m%d%H%M", time.localtime(t))
+    csv_doc = f"{date}_divaview.csv"
+
     for dropfolder in drop_folders:
+
         source_destination = source_dest[index]
 
         if source_destination == "Isilon2_Archive":
             volume_name = dropfolder[9:16]
         else:
             volume_name = dropfolder[9:17]
+
+        comments = volume_name
 
         check_df_msg = f"Checking drop folder on: {volume_name}"
         logger.info(check_df_msg)
@@ -120,43 +128,39 @@ def create_csv():
             continue
 
         else:
-            try:
+            try: 
                 archive_list_size_checked = []
                 for x in archive_list:
                     dpath = os.path.join(dropfolder, x)
-                    if (
-                        source_destination != "Isilon2_Archive"
-                    ):  # size check does not work on Isilon2
+                    if source_destination != "Isilon2_Archive":  #size check does not work on Isilon2
                         total_size = checksize.get_object_size(dpath)
-                        if total_size == 0:
-                            logger.info(
-                                f"Total filesize for {x} measured as 0. Removing from archive_list."
-                            )
+                        if total_size == 0: 
+                            logger.info(f"Total filesize for {x} measured as 0. Removing from archive_list.")
                             continue
                         else:
                             archive_list_size_checked.append(x)
-                    else:
+                    else: 
                         archive_list_size_checked.append(x)
 
-            except Exception as e:
+            except Exception as e: 
                 logger.error(f"Exception raised on total size check: \n{e}")
+
 
             archive_list = archive_list_size_checked[:10]  # only take 10 at a time,
             # avoid scenario when 1000's of dir dropped
-            t = time.time()
-            date = time.strftime("%Y%m%d%H%M", time.localtime(t))
+
             dedup_dlist = dedup_list(archive_list, date, dropfolder, index)
-            csv_doc = f"{date}_{volume_name}.csv"
 
             dlist_msg = f"New directories for archiving: {dedup_dlist}"
             logger.info(dlist_msg)
 
             movelist = []
-            movelist.append(os.path.join(dropfolder, csv_doc))
+            # movelist.append(os.path.join(dropfolder, csv_doc))
 
-            os.chdir(dropfolder)
+            csv_tmp = os.path.join(script_root, "_csv_tmp")
+            os.chdir(csv_tmp)
 
-        with open(f"{csv_doc}", mode="w", newline="", encoding="utf-8-sig") as csv_file:
+        with open(f"{csv_doc}", mode="a", newline="", encoding="utf-8-sig") as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=",")
 
             count = 0
@@ -177,7 +181,7 @@ def create_csv():
                 else:
                     validation_result = fpmod.check_pathname(dpath)
 
-                    if validation_result == 1:
+                    if validation_result == 1: 
                         continue
 
                     if count == 0:
@@ -188,6 +192,7 @@ def create_csv():
                                 "source destination",
                                 "root path",
                                 "list of files",
+                                "comments",
                             ]
                         )
 
@@ -204,6 +209,7 @@ def create_csv():
                                 source_destination,
                                 archive_f_windows,
                                 f"{d}",
+                                comments,
                             ]
                         )
                     else:
@@ -214,6 +220,7 @@ def create_csv():
                                 source_destination,
                                 archive_f_windows,
                                 f"{d}/*",
+                                comments,
                             ]
                         )
 
@@ -223,7 +230,7 @@ def create_csv():
 
             csv_file.close()
 
-            new_csv_msg = f"New .csv file created: {csv_doc}"
+            new_csv_msg = f".csv file updated for {volume_name}"
             logger.info(new_csv_msg)
 
             moved_list = move_to_checkin(movelist, dropfolder)
@@ -233,13 +240,17 @@ def create_csv():
             logger.info(move_msg)
 
         index += 1
+    
+    shutil.move(os.path.join(csv_tmp, csv_doc), csv_archive_dropfolder)
+    logger.info(f"csv file moved from tmp to the watch folder: {csv_doc}")
 
 
 def get_csv_count(f):
+    
     os.chdir(f)
     csv_watchf = glob.glob("*.csv", recursive=False)
 
-    os.chdir(os.path.join(f, "_archiving"))
+    os.chdir(os.path.join(f,"_archiving"))
     csv_archivingf = glob.glob("*.csv", recursive=False)
 
     csv_count = len(csv_watchf) + len(csv_archivingf)
@@ -249,6 +260,7 @@ def get_csv_count(f):
 
 
 def csv_cleanup(drop_f):
+
     try:
         dropf_path = Path(drop_f).glob("*.csv")
         archiving_path = Path(drop_f, "_archiving").glob("*.csv")
@@ -262,7 +274,9 @@ def csv_cleanup(drop_f):
         return
 
     except OSError as e:
-        unlink_error_msg = f"Error Removeing old .CSV: {f}: {e.strerror}"
+        unlink_error_msg = (
+            f"Error Removeing old .CSV: {f}: {e.strerror}"
+        )
         logger.error(unlink_error_msg)
 
 

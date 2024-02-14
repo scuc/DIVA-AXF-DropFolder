@@ -19,18 +19,19 @@ logger = logging.getLogger(__name__)
 
 
 def check_root_paths():
+
     root_folders = []
 
-    for volume in mac_root_folders:
+    for volume in mac_root_folders: 
         volume_present = os.path.ismount(volume)
         root_folders.append([volume, volume_present])
 
-    for location in root_folders:
+    for location in root_folders: 
         if location[1] is False:
             mount_err_msg = f"Volume is missing: {location[0]}"
             logger.error(mount_err_msg)
             root_folders = False
-        else:
+        else: 
             root_folders = True
 
     return root_folders
