@@ -15,7 +15,7 @@ The script follows a series of steps:
 
 1. Check the queue of folder sets in the archive location. <br> If the folder count is above the set threshold (default = 10), <br> pause the script for 5min and then check again. Continue this loop <br> until the archive queue is below the allowed count. <br>
 <br>
-2. Create a list of new folder sets in the DMF drop folder location. <br> If the length of the list is not zero, begin iterating over the list of set list. <br>
+2. Create a list of new folder sets in the drop folder location(s). <br> If the length of the list is not zero, begin iterating over the list of set list. <br>
 <br>
 3. For each folder in the set list, check to the size to determine if the directory is still growing. <br> If the folder size is still growing after 90secs, move on the next directory on the list. <br>If it is not growing, move on to the next step. <br><br>
 4. Walk the entire directory structure of each folder set, and <br> check each sub-directory and file name for illegal characters. <br> Replace or remove any illegal characters that are found. <br><br>
@@ -77,11 +77,24 @@ The script follows a series of steps:
 &nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
 
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; paths: &nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; mac\_archive\_folder:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; mac\_dropfolder:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; win\_dropfolder:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; win\_archive_folder:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; DIVA_Source_Dest:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; script_root:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; mac_root_path:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; win_root_path:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; drop_folder::&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; csv_dropfolder:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; archiving:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; error:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; duplicates:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; requires_zip:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; win_archive::&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; DIVA_Source_Dest: &nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; DIVA_Obj_Category: &nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;    
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; urls: &nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; core_data_api:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; core_manager_api:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; creds: &nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; name:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp;  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; password:&nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp; 
  
 * In the terminal cd to the source directory for the script and enter the command:<br>
 &nbsp;   &nbsp;   &nbsp;   &nbsp;   &nbsp; `python main.py`
