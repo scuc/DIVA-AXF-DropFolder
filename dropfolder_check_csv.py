@@ -75,6 +75,7 @@ def create_csv():
     _incomplete and a size larger than 0 KB.
     """
     index = 0
+    submission_count = 0
     t = time.time()
     date = time.strftime("%Y%m%d%H%M", time.localtime(t))
     csv_doc = f"{date}_divaview.csv"
@@ -160,89 +161,90 @@ def create_csv():
             csv_tmp = os.path.join(script_root, "_csv_tmp")
             os.chdir(csv_tmp)
 
-        with open(f"{csv_doc}", mode="a", newline="", encoding="utf-8-sig") as csv_file:
-            csv_writer = csv.writer(csv_file, delimiter=",")
+            with open(f"{csv_doc}", mode="a", newline="", encoding="utf-8-sig") as csv_file:
+                csv_writer = csv.writer(csv_file, delimiter=",")
 
-            count = 0
-            for d in dedup_dlist:
-                dpath = os.path.join(dropfolder, d)
-                dir_value = checksize.check_obj_size(dpath)
+                for d in dedup_dlist:
+                    dpath = os.path.join(dropfolder, d)
+                    dir_value = checksize.check_obj_size(dpath)
 
-                if dir_value == 0 or dir_value == 1:
-                    continue
-
-                elif dir_value == 3:
-                    oserror_msg = f"OSError found, likely illegal characters, unable to correct, moving to ERROR folder."
-                    logger.error(oserror_msg)
-                    shutil.move(
-                        dpath,
-                    )
-
-                else:
-                    validation_result = fpmod.check_pathname(dpath)
-
-                    if validation_result == 1: 
+                    if dir_value == 0 or dir_value == 1:
                         continue
 
-                    if count == 0:
-                        csv_writer.writerow(
-                            [
-                                "object name",
-                                "object category",
-                                "source destination",
-                                "root path",
-                                "list of files",
-                                "comments",
-                            ]
+                    elif dir_value == 3:
+                        oserror_msg = f"OSError found, likely illegal characters, unable to correct, moving to ERROR folder."
+                        logger.error(oserror_msg)
+                        shutil.move(
+                            dpath,
                         )
 
-                    if count == 3:
-                        max_count_msg = f"Maximum number of submissions reached for this archive cycle."
-                        logger.info(max_count_msg)
-                        break
-
-                    if os.path.isfile(dpath):
-                        csv_writer.writerow(
-                            [
-                                f"{d}",
-                                obj_category,
-                                source_destination,
-                                archive_f_windows,
-                                f"{d}",
-                                comments,
-                            ]
-                        )
                     else:
-                        csv_writer.writerow(
-                            [
-                                f"{d}",
-                                obj_category,
-                                source_destination,
-                                archive_f_windows,
-                                f"{d}/*",
-                                comments,
-                            ]
-                        )
+                        validation_result = fpmod.check_pathname(dpath)
 
-                    movelist.append(dpath)
+                        if validation_result == 1: 
+                            continue
 
-                count += 1
+                        if submission_count == 0:
+                            csv_writer.writerow(
+                                [
+                                    "object name",
+                                    "object category",
+                                    "source destination",
+                                    "root path",
+                                    "list of files",
+                                    "comments",
+                                ]
+                            )
 
-            csv_file.close()
+                        if submission_count == 20:
+                            max_count_msg = f"Maximum number of submissions reached for this archive cycle."
+                            logger.info(max_count_msg)
+                            break
 
-            new_csv_msg = f".csv file updated for {volume_name}"
-            logger.info(new_csv_msg)
+                        if os.path.isfile(dpath):
+                            csv_writer.writerow(
+                                [
+                                    f"{d}",
+                                    obj_category,
+                                    source_destination,
+                                    archive_f_windows,
+                                    f"{d}",
+                                    comments,
+                                ]
+                            )
+                        else:
+                            csv_writer.writerow(
+                                [
+                                    f"{d}",
+                                    obj_category,
+                                    source_destination,
+                                    archive_f_windows,
+                                    f"{d}/*",
+                                    comments,
+                                ]
+                            )
 
-            moved_list = move_to_checkin(movelist, dropfolder)
-            move_msg = (
-                f"Directories moved into archiving on {volume_name}: \n{moved_list}"
-            )
-            logger.info(move_msg)
+                        movelist.append(dpath)
+
+                    submission_count += 1
+
+                csv_file.close()
+
+                new_csv_msg = f".csv file updated for {volume_name}"
+                logger.info(new_csv_msg)
+
+                moved_list = move_to_checkin(movelist, dropfolder)
+                move_msg = (
+                    f"Directories moved into archiving on {volume_name}: \n{moved_list}"
+                )
+                logger.info(move_msg)
+                
+                shutil.move(os.path.join(csv_tmp, csv_doc), csv_archive_dropfolder)
+                logger.info(f"csv file moved from tmp to the watch folder: {csv_doc}")
 
         index += 1
     
-    shutil.move(os.path.join(csv_tmp, csv_doc), csv_archive_dropfolder)
-    logger.info(f"csv file moved from tmp to the watch folder: {csv_doc}")
+
 
 
 def get_csv_count(f):
