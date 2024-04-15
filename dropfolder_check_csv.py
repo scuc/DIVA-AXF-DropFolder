@@ -86,6 +86,8 @@ def create_csv():
 
         if source_destination == "Isilon2_Archive":
             volume_name = dropfolder[9:16]
+        elif source_destination == "NG-Editorial_Archive": 
+            volume_name = dropfolder[9:21] 
         else:
             volume_name = dropfolder[9:17]
 
@@ -133,7 +135,7 @@ def create_csv():
                 archive_list_size_checked = []
                 for x in archive_list:
                     dpath = os.path.join(dropfolder, x)
-                    if source_destination != "Isilon2_Archive":  #size check does not work on Isilon2
+                    if source_destination not in ["Isilon2_Archive", "NG-Editorial"]:  #size check does not work on Isilon2
                         total_size = checksize.get_object_size(dpath)
                         if total_size == 0: 
                             logger.info(f"Total filesize for {x} measured as 0. Removing from archive_list.")
@@ -248,7 +250,15 @@ def create_csv():
 
 
 def get_csv_count(f):
-    
+    """
+    Get the count of CSV files in the specified directory.
+
+    Args:
+        f (str): The directory path.
+
+    Returns:
+        int: The count of CSV files in the directory.
+    """
     os.chdir(f)
     csv_watchf = glob.glob("*.csv", recursive=False)
 
@@ -262,7 +272,18 @@ def get_csv_count(f):
 
 
 def csv_cleanup(drop_f):
+    """
+    Remove all CSV files from the drop folder and the _archiving folder.
 
+    Args:
+        drop_f (str): The path to the drop folder.
+
+    Raises:
+        OSError: If there is an error removing the CSV files.
+
+    Returns:
+        None
+    """
     try:
         dropf_path = Path(drop_f).glob("*.csv")
         archiving_path = Path(drop_f, "_archiving").glob("*.csv")
@@ -328,7 +349,21 @@ def dedup_list(archive_list, date, dropfolder, index):
 
 
 def dup_rename(duplicates, date, dropfolder):
-    # if dir by the same name already exisits in DIVA, append dir name with datetime stamp.
+    """
+    Renames duplicate objects in the dropfolder with a datetime stamp.
+
+    Args:
+        duplicates (list): A list of duplicate object names.
+        date (str): The current date in the format 'YYYY-MM-DD'.
+        dropfolder (str): The path to the dropfolder directory.
+
+    Returns:
+        list: A list of renamed object names.
+
+    Raises:
+        Exception: If an error occurs during the renaming process.
+
+    """
     renamed_obj_list = []
     try:
         for dup in duplicates:
@@ -361,7 +396,18 @@ def dup_rename(duplicates, date, dropfolder):
 
 def move_to_checkin(movelist, dropfolder):
     """
-    Move files and dir in the movelist from the drop folder to the archive location.
+    Moves files from the movelist to the check-in location in the dropfolder.
+
+    Args:
+        movelist (list): A list of file paths to be moved.
+        dropfolder (str): The path to the dropfolder.
+
+    Returns:
+        list: A list of file names that were successfully moved.
+
+    Raises:
+        Exception: If an error occurs while moving a file.
+
     """
     moved_list = []
     for x in movelist:

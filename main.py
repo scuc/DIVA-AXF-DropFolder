@@ -4,14 +4,14 @@
 import logging
 import logging.config
 import os
+from datetime import datetime
+from sys import platform
+from time import localtime, strftime
+
 import yaml
 
-from datetime import datetime
-from time import localtime, strftime
-from sys import platform
-
-import config
 import check_root_paths as crp
+import config
 import dropfolder_check_csv as dfc
 import permissions_fix as permissions
 
@@ -57,6 +57,13 @@ def set_logger():
 
 
 def main():
+    """
+    This function is the entry point of the DIVA Archive Script.
+    It performs various tasks related to archiving and logging.
+
+    Returns:
+        None
+    """
 
     date_start = str(strftime("%A, %d. %B %Y %I:%M%p", localtime()))
 
@@ -71,19 +78,17 @@ def main():
 
     root_paths = crp.check_root_paths()
 
-    # if root_paths is not False: 
+    # if root_paths is not False:
     #     dfc.create_csv()
     # else:
     #     pass
-
 
     if platform == "darwin" and root_paths is not False:
         p = permissions.chmod_chown(drop_folders)
     else:
         p = None
 
-    if (p != "error"
-        or platform != "darwin"):
+    if p != "error" or platform != "darwin":
         dfc.create_csv()
     else:
         pass

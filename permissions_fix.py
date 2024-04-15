@@ -11,12 +11,25 @@ logger = logging.getLogger(__name__)
 
 
 def chmod_chown(drop_f):
+    """
+    Fix file permissions for the specified folders.
+
+    Args:
+        drop_f (list): A list of folders to fix permissions for.
+
+    Returns:
+        str: A string indicating the completion status of the function.
+
+    Raises:
+        Exception: If there is an error in the file permissions subprocess.
+
+    """
     error = False
     start_msg = f"\n\n=========================== START PERMISSIONS FIX ==========================="
     logger.info(start_msg)
     for folder in drop_f:
         try:
-            if "Isilon2" in folder.split("/"):
+            if "Isilon2" in folder.split("/") or "NG-Editorial" in folder.split("/"):
                 continue
             else:
                 os.chdir(script_root)

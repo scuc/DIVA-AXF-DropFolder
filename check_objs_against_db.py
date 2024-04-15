@@ -43,6 +43,8 @@ def get_archived_objects():
 
         if source_destination == "Isilon2_Archive":
             volume_name = archivefolder[9:16]
+        elif source_destination == "NG-Editorial_Archive": 
+            volume_name = archivefolder[9:21] 
         else:
             volume_name = archivefolder[9:17]
 
@@ -121,6 +123,16 @@ def get_archived_objects():
 
 
 def delete_obj(archivefolder, objectName):
+    """
+    Deletes the specified object from the archive folder.
+
+    Args:
+        archivefolder (str): The path to the archive folder.
+        objectName (str): The name of the object to be deleted.
+
+    Returns:
+        None
+    """
 
     path = os.path.join(archivefolder, objectName)
     isdir = os.path.isdir(path)
