@@ -43,8 +43,8 @@ def get_archived_objects():
 
         if source_destination == "Isilon2_Archive":
             volume_name = archivefolder[9:16]
-        elif source_destination == "NG-Editorial_Archive": 
-            volume_name = archivefolder[9:21] 
+        elif source_destination == "NG_Editorial_Archive":
+            volume_name = archivefolder[9:21]
         else:
             volume_name = archivefolder[9:17]
 
