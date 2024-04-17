@@ -43,6 +43,9 @@ def create_csv():
     of file/folder paths to archive. Use the path list
     to write a .csv file that is used as the trigger for
     the DIVA archive job.
+
+    Returns:
+        None
     """
 
     queue_status = aqueue.archiving_check()
