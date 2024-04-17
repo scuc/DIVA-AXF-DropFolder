@@ -29,7 +29,7 @@ def chmod_chown(drop_f):
     logger.info(start_msg)
     for folder in drop_f:
         try:
-            if "Isilon2" in folder.split("/") or "NG-Editorial" in folder.split("/"):
+            if "Isilon2" in folder.split("/") or "ng-editorial" in folder.split("/"):
                 continue
             else:
                 os.chdir(script_root)
@@ -49,7 +49,7 @@ def chmod_chown(drop_f):
             logger.error(perm_err_msg)
             error = True
 
-    end_msg = f"\n=========================== END PERMISSIONS FIX ===========================\n"
+    end_msg = "\n=========================== END PERMISSIONS FIX ===========================\n"
     logger.info(end_msg)
     return "done"
 
