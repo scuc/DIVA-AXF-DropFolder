@@ -71,10 +71,12 @@ def create_csv():
 
         source_destination = source_dest[index]
 
-        if source_destination == "Isilon2_Archive":
-            volume_name = dropfolder[9:16]
-        elif source_destination == "NG_Editorial_Archive":
-            volume_name = dropfolder[9:21]
+        if source_destination in [
+            "Isilon2_Archive",
+            "NG_Editorial_Archive",
+            "fsis3_Archive",
+        ]:
+            volume_name = dropfolder.split("/")[2]
         else:
             volume_name = dropfolder[9:17]
 
@@ -125,7 +127,8 @@ def create_csv():
                     if source_destination not in [
                         "Isilon2_Archive",
                         "NG_Editorial_Archive",
-                    ]:  # size check does not work on Isilon2
+                        "fsis3_Archive",
+                    ]:  # size check does not work on these SMB volumes
                         total_size = checksize.get_object_size(dpath)
                         if total_size == 0:
                             logger.info(
