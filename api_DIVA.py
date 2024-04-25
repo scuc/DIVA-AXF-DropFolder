@@ -27,7 +27,6 @@ def file_check(objectName):
 
     try:
         token = auth.get_auth()
-        # print(token)
         url_object_byobjectName = f"https://{url_core_manager}/objects/filesAndFolders"
 
         params = {
@@ -50,26 +49,16 @@ def file_check(objectName):
             url_object_byobjectName, headers=headers, params=params, verify=False
         )
 
-        # print("=" * 25)
-        # print(f"REQUEST URL: {r.request.url}")
-        # print(f"REQUEST BODY: {r.request.body}")
-        # print(f"REQUEST HEADERS: {r.request.headers}")
-        # print("=" * 25)
-
         response = r.json()
 
         code = r.status_code
-        # print(f"============ {code} ==============")
-        # print("RESPONSE:")
-        # pprint.pprint(response)
-        # print(f"STATUS_CODE: {code}")
 
         status_code_msg = f"DIVA DB Check returned a status code: {code}"
         logger.debug(status_code_msg)
 
-        if str(code) == "404":
+        if code == 404:
             return False
-        elif str(code) == "200":
+        elif code == 200:
             return True
         else:
             return "error"
@@ -103,23 +92,19 @@ def get_object_info(objectName):
         db_check_msg = f"Checking object info for:  {objectName}"
         logger.debug(db_check_msg)
 
-        r = requests.get(
-            url, headers=headers, params=params, verify=False
-        )
+        r = requests.get(url, headers=headers, params=params, verify=False)
 
-        print(r.status_code)
         response = r.json()
         logger.debug(f"Status Code = {r.status_code}")
 
-        if r.status_code == 200: 
+        if r.status_code == 200:
             tapeInstances = len(response["tapeInstances"])
-        elif r.status_code == 404: 
+        elif r.status_code == 404:
             tapeInstances = 0
         else:
             tapeInstances = -1
 
         logger.info(f"tapeInstances = {tapeInstances}")
-        print(tapeInstances)
         return tapeInstances
 
     except Exception as e:
@@ -148,7 +133,7 @@ def get_requests(startDateTime):
             "sortField": "ID",
             "sortDirection": "ASC",
             "type": "Archive",
-            "startDateTime": {startDateTime},
+            "startDateTime": startDateTime,
             "states": [
                 "Running",
                 "Waiting for resources",
@@ -169,9 +154,6 @@ def get_requests(startDateTime):
 
         r = requests.get(url_requests, headers=headers, params=params, verify=False)
         response = r.json()
-        # pprint.pprint(response)
-        # print("")
-        # print("")
         json_data = json_normalize(response)
         data = json_data["requests"][0]
         df = pd.DataFrame(
