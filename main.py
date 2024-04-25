@@ -1,6 +1,4 @@
 import logging
-
-#! /usr/bin/env python3
 import logging.config
 import os
 from datetime import datetime

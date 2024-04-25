@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 import logging
 import os
 import time
@@ -43,12 +41,10 @@ def check_obj_size(dpath):
             chk_count_msg = f"Check Count = {check_count}"
 
             if total_size != checked_size and check_count < 3:
-
                 logger.info(chk_count_msg)
                 logger.info(growing_msg)
                 logger.info(pause_msg)
                 log_sizecheck_msg(dpath, checked_size, total_size)
-
                 time.sleep(10)
                 continue
 
@@ -72,7 +68,7 @@ def check_obj_size(dpath):
 
         except Exception as e:
             logger.exception(e)
-            if OSError:
+            if isinstance(e, OSError):
                 size_value = 3
             return size_value
 
@@ -83,22 +79,17 @@ def get_object_size(directory):
     """Returns the `directory` size in bytes."""
     total = 0
     try:
-        # print("[+] Getting the size of", directory)
         for entry in os.scandir(directory):
             if entry.is_file():
-                # if it's a file, use stat() function
                 total += entry.stat().st_size
             elif entry.is_dir():
-                # if it's a directory, recursively call this function
                 try:
                     total += get_object_size(entry.path)
                 except FileNotFoundError:
                     pass
     except NotADirectoryError:
-        # if `directory` isn't a directory, get the file size then
         return os.path.getsize(directory)
     except PermissionError:
-        # if for whatever reason we can't open the folder, return 0
         return 0
     return total
 

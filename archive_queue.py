@@ -8,7 +8,6 @@ import config
 
 config = config.get_config()
 
-
 script_root = config["paths"]["script_root"]
 mac_root_folders = config["paths"]["mac_root_path"]
 drop_folders = [
@@ -19,7 +18,6 @@ archive_folders = [
     os.path.join(x, config["paths"]["archiving"]) for x in mac_root_folders
 ]
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -29,8 +27,7 @@ def get_archiving_list():
     """
     archiving_list = []
     for x in archive_folders:
-        alist = [d for d in os.listdir(x) if not d.startswith(".")]
-        archiving_list = archiving_list + alist
+        archiving_list.extend([d for d in os.listdir(x) if not d.startswith(".")])
     return archiving_list
 
 
@@ -46,18 +43,12 @@ def archiving_check():
             archive_jobs = api.get_requests(startDateTime)
 
             if len(archive_jobs) > 15:
-
                 if cycle_count == 0:
-                    pause_msg = f"Objects archiving: {archive_jobs}\n\
-                                  Script will pause while archive queue clears."
+                    pause_msg = f"Objects archiving: {archive_jobs}\nScript will pause while archive queue clears."
                 elif cycle_count % 5 == 0 and cycle_count != 30:
-                    pause_msg = f"Archiving Queue paused for: {cycle_count*300} seconds \n\
-                                  Current active archive count: {archive_jobs}\n\
-                                  Processing will resume when the active archive count drops."
+                    pause_msg = f"Archiving Queue paused for: {cycle_count*300} seconds\nCurrent active archive count: {archive_jobs}\nProcessing will resume when the active archive count drops."
                 elif cycle_count == 30:
-                    pause_msg = f"Archiving Queue paused for: {cycle_count*300} seconds \n\
-                                Current active archive count: {archive_jobs}\n\
-                                STOPPING ARCHIVE ATTEMPT, will try again later"
+                    pause_msg = f"Archiving Queue paused for: {cycle_count*300} seconds\nCurrent active archive count: {archive_jobs}\nSTOPPING ARCHIVE ATTEMPT, will try again later"
                     queue_status = 1
                     logger.info(pause_msg)
                     return queue_status
@@ -69,10 +60,7 @@ def archiving_check():
                 time.sleep(90)
                 continue
             else:
-                queue_clear_msg = f"Archiving Queue status. \n\
-                                    Current active archive count: {archive_jobs}\n\
-                                    Processing of new sets was paused for a total of {cycle_count*300}.seconds.\n\
-                                    Archive submission will proceed."
+                queue_clear_msg = f"Archiving Queue status.\nCurrent active archive count: {archive_jobs}\nProcessing of new sets was paused for a total of {cycle_count*300} seconds.\nArchive submission will proceed."
                 logger.info(queue_clear_msg)
                 queue_status = 0
                 return queue_status

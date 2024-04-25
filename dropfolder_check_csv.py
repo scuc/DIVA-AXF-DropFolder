@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 import csv
 import glob
 import logging
@@ -32,7 +31,6 @@ duplicate_object_dir = config["paths"]["duplicates"]
 obj_category = config["DIVA_Obj_Category"]
 source_dest = config["DIVA_Source_Dest"]
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -52,22 +50,8 @@ def create_csv():
 
     if queue_status != 0:
         return
-    else:
-        pass
 
-    """
-    for each watch folder, create a list of directories present, check to see
-    if the same directories are not already present in _archiving and
-    _incomplete and a size larger than 0 KB.
-    """
-    index = 0
-    submission_count = 0
-    t = time.time()
-    date = time.strftime("%Y%m%d%H%M", time.localtime(t))
-    csv_doc = f"{date}_divaview.csv"
-    csv_tmp = os.path.join(script_root, "_csv_tmp")
-
-    for dropfolder in drop_folders:
+    for index, dropfolder in enumerate(drop_folders):
 
         source_destination = source_dest[index]
 
@@ -103,11 +87,7 @@ def create_csv():
             if os.path.isfile(os.path.join(dropfolder, f))
             and f not in ["_archiving", "_incomplete"]
             and not f.startswith(".")
-            and f.endswith(".mov")
-            or f.endswith(".mxf")
-            or f.endswith(".xml")
-            or f.endswith(".tar")
-            or f.endswith(".zip")
+            and f.endswith((".mov", ".mxf", ".xml", ".tar", ".zip"))
         ]
 
         archive_list = dir_list + file_list
@@ -116,130 +96,123 @@ def create_csv():
         if len(archive_list) == 0:
             empty_msg = f"{volume_name} = No new dir for archiving."
             logger.info(empty_msg)
-            index += 1
             continue
 
-        else:
-            try:
-                archive_list_size_checked = []
-                for x in archive_list:
-                    dpath = os.path.join(dropfolder, x)
-                    if source_destination not in [
-                        "Isilon2_Archive",
-                        "NG_Editorial_Archive",
-                        "fsis3_Archive",
-                    ]:  # size check does not work on these SMB volumes
-                        total_size = checksize.get_object_size(dpath)
-                        if total_size == 0:
-                            logger.info(
-                                f"Total filesize for {x} measured as 0. Removing from archive_list."
-                            )
-                            continue
-                        else:
-                            archive_list_size_checked.append(x)
+        try:
+            archive_list_size_checked = []
+            for x in archive_list:
+                dpath = os.path.join(dropfolder, x)
+                if source_destination not in [
+                    "Isilon2_Archive",
+                    "NG_Editorial_Archive",
+                    "fsis3_Archive",
+                ]:  # size check does not work on these SMB volumes
+                    total_size = checksize.get_object_size(dpath)
+                    if total_size == 0:
+                        logger.info(
+                            f"Total filesize for {x} measured as 0. Removing from archive_list."
+                        )
+                        continue
                     else:
                         archive_list_size_checked.append(x)
+                else:
+                    archive_list_size_checked.append(x)
 
-            except Exception as e:
-                logger.error(f"Exception raised on total size check: \n{e}")
+        except Exception as e:
+            logger.error(f"Exception raised on total size check: \n{e}")
 
-            archive_list = archive_list_size_checked[:10]
-            # only take 10 at a time,
-            # avoid scenario when 1000's of dir dropped
+        archive_list = archive_list_size_checked[:10]
+        # only take 10 at a time,
+        # avoid scenario when 1000's of dir dropped
 
-            dedup_dlist = dedup_list(archive_list, date, dropfolder, index)
+        dedup_dlist = dedup_list(archive_list, date, dropfolder, index)
 
-            dlist_msg = f"New directories for archiving: {dedup_dlist}"
-            logger.info(dlist_msg)
+        dlist_msg = f"New directories for archiving: {dedup_dlist}"
+        logger.info(dlist_msg)
 
-            movelist = []
-            # movelist.append(os.path.join(dropfolder, csv_doc))
+        movelist = []
 
-            os.chdir(csv_tmp)
+        os.chdir(csv_tmp)
 
-            with open(
-                f"{csv_doc}", mode="a", newline="", encoding="utf-8-sig"
-            ) as csv_file:
-                csv_writer = csv.writer(csv_file, delimiter=",")
+        with open(f"{csv_doc}", mode="a", newline="", encoding="utf-8-sig") as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=",")
 
-                for d in dedup_dlist:
-                    dpath = os.path.join(dropfolder, d)
-                    dir_value = checksize.check_obj_size(dpath)
+            for d in dedup_dlist:
+                dpath = os.path.join(dropfolder, d)
+                dir_value = checksize.check_obj_size(dpath)
 
-                    if dir_value == 0 or dir_value == 1:
+                if dir_value == 0 or dir_value == 1:
+                    continue
+
+                elif dir_value == 3:
+                    logger.error(
+                        "OSError found, likely illegal characters, unable to correct, moving to ERROR folder."
+                    )
+                    shutil.move(
+                        dpath,
+                    )
+
+                else:
+                    validation_result = fpmod.check_pathname(dpath)
+
+                    if validation_result == 1:
                         continue
 
-                    elif dir_value == 3:
-                        logger.error(
-                            "OSError found, likely illegal characters, unable to correct, moving to ERROR folder."
-                        )
-                        shutil.move(
-                            dpath,
+                    if submission_count == 0:
+                        csv_writer.writerow(
+                            [
+                                "object name",
+                                "object category",
+                                "source destination",
+                                "root path",
+                                "list of files",
+                                "comments",
+                            ]
                         )
 
+                    if submission_count == 20:
+                        logger.info(
+                            "Maximum number of submissions reached for this archive cycle."
+                        )
+                        break
+
+                    if os.path.isfile(dpath):
+                        csv_writer.writerow(
+                            [
+                                f"{d}",
+                                obj_category,
+                                source_destination,
+                                archive_f_windows,
+                                f"{d}",
+                                comments,
+                            ]
+                        )
                     else:
-                        validation_result = fpmod.check_pathname(dpath)
+                        csv_writer.writerow(
+                            [
+                                f"{d}",
+                                obj_category,
+                                source_destination,
+                                archive_f_windows,
+                                f"{d}/*",
+                                comments,
+                            ]
+                        )
 
-                        if validation_result == 1:
-                            continue
+                    movelist.append(dpath)
 
-                        if submission_count == 0:
-                            csv_writer.writerow(
-                                [
-                                    "object name",
-                                    "object category",
-                                    "source destination",
-                                    "root path",
-                                    "list of files",
-                                    "comments",
-                                ]
-                            )
+                submission_count += 1
 
-                        if submission_count == 20:
-                            logger.info(
-                                "Maximum number of submissions reached for this archive cycle."
-                            )
-                            break
+            csv_file.close()
 
-                        if os.path.isfile(dpath):
-                            csv_writer.writerow(
-                                [
-                                    f"{d}",
-                                    obj_category,
-                                    source_destination,
-                                    archive_f_windows,
-                                    f"{d}",
-                                    comments,
-                                ]
-                            )
-                        else:
-                            csv_writer.writerow(
-                                [
-                                    f"{d}",
-                                    obj_category,
-                                    source_destination,
-                                    archive_f_windows,
-                                    f"{d}/*",
-                                    comments,
-                                ]
-                            )
+            new_csv_msg = f".csv file updated for {volume_name}"
+            logger.info(new_csv_msg)
 
-                        movelist.append(dpath)
-
-                    submission_count += 1
-
-                csv_file.close()
-
-                new_csv_msg = f".csv file updated for {volume_name}"
-                logger.info(new_csv_msg)
-
-                moved_list = move_to_checkin(movelist, dropfolder)
-                move_msg = (
-                    f"Directories moved into archiving on {volume_name}: \n{moved_list}"
-                )
-                logger.info(move_msg)
-
-        index += 1
+            moved_list = move_to_checkin(movelist, dropfolder)
+            move_msg = (
+                f"Directories moved into archiving on {volume_name}: \n{moved_list}"
+            )
+            logger.info(move_msg)
 
     if os.path.exists(os.path.join(csv_tmp, csv_doc)):
         shutil.move(os.path.join(csv_tmp, csv_doc), csv_archive_dropfolder)

@@ -1,12 +1,9 @@
-#! /usr/bin/env python3
-
 import logging
 import os
 import re
 import shutil
 from collections import Counter
 from pathlib import Path
-from string import whitespace
 
 import config
 from check_obj_size import get_object_size as get_size
@@ -18,12 +15,14 @@ config = config.get_config()
 script_root = config["paths"]["script_root"]
 mac_root_folders = config["paths"]["mac_root_path"]
 archive_error_f = [os.path.join(x, config["paths"]["error"]) for x in mac_root_folders]
-archive_req_zip_f = [os.path.join(x, config["paths"]["requires_zip"]) for x in mac_root_folders]
+archive_req_zip_f = [
+    os.path.join(x, config["paths"]["requires_zip"]) for x in mac_root_folders
+]
 
 
 def check_pathname(path):
     """
-    Check each path recursively, and elminiate any illegal characters.
+    Check each path recursively, and eliminate any illegal characters.
     """
 
     total_dir_change = 0
@@ -40,11 +39,11 @@ def check_pathname(path):
                 for name in dirs:
                     pathname = os.path.join(root, name)
                     dir_count += 1
-                    cleanname, cleanname_totals = makeSafeName(root, name)
+                    cleanname, cleanname_totals = make_safe_name(root, name)
 
                     cleanname_total.update(cleanname_totals)
 
-                    if cleanname == False:
+                    if not cleanname:
                         name_err_msg = f"Error (E1) cleaning filename, moving to Archive_Error - {pathname}"
                         logger.info(name_err_msg)
                         move_to_archive_error(path)
@@ -53,8 +52,6 @@ def check_pathname(path):
                     if len(cleanname) != len(name):
                         dir_chng_count += 1
                         continue
-                    else:
-                        pass
 
             if dir_chng_count != 0:
                 total_dir_change = dir_chng_count + total_dir_change
@@ -79,47 +76,29 @@ def check_pathname(path):
                 pathname = os.path.join(root, name)
                 file_count += 1
                 if (
-                    name.startswith(".DS_Store")
-                    or name.startswith("._")
+                    name.startswith((".DS_Store", "._"))
                     and os.stat(pathname).st_size < 5000
                 ):
                     os.remove(pathname)
                     ds_count += 1
                     continue
-                else:
-                    cleanname, cleanname_totals = makeSafeName(root, name)
 
-                    cleanname_total.update(cleanname_totals)
+                cleanname, cleanname_totals = make_safe_name(root, name)
 
-                    if cleanname == False:
-                        name_err_msg = f"Error(E2) cleaning filename, moving to Archive_Error - {pathname}"
-                        logger.info(name_err_msg)
-                        move_to_archive_error(path)
-                        return
+                cleanname_total.update(cleanname_totals)
 
-                    if len(cleanname) != len(name):
-                        file_chng_count += 1
-                    else:
-                        pass
+                if not cleanname:
+                    name_err_msg = f"Error(E2) cleaning filename, moving to Archive_Error - {pathname}"
+                    logger.info(name_err_msg)
+                    move_to_archive_error(path)
+                    return
 
-                    # if len(os.path.join(root, cleanname)) > 255:
-                    #     illegal_path = os.path.join(root, cleanname)
-                    #     char_limit_msg = f"Too many characters for Windows path (>255): \n {illegal_path} "
-                    #     logger.info(char_limit_msg)
-                    #     write_path_to_txt(path, illegal_path)
-                    #     validation_result = 1
-                    #     char_limit_count +=1 
-                    # else:
-                    #     pass
+                if len(cleanname) != len(name):
+                    file_chng_count += 1
 
     except Exception as e:
         file_walk_msg = f"Exception on FILE Walk: \n {e}"
         logger.error(file_walk_msg)
-
-    # if char_limit_count > 0: 
-        # move_to_archive_zip(path)
-        # mv_msg = f"{path} moved to _Archive_REQ_ZIP directory."
-        # logger.info(mv_msg)
 
     total_dir_msg = f"{dir_count} sub-directories in project {os.path.basename(path)}"
     total_files_msg = (
@@ -131,8 +110,12 @@ def check_pathname(path):
     file_name_change_msg = (
         f"{file_chng_count} file names changed to remove illegal characters."
     )
-    char_limit_count_msg = f"{char_limit_count} file paths that exceed the 255 Windows limit"
-    illegal_chars_msg = f"{cleanname_total['illegal_char_count']} illegal characters were found."
+    char_limit_count_msg = (
+        f"{char_limit_count} file paths that exceed the 255 Windows limit"
+    )
+    illegal_chars_msg = (
+        f"{cleanname_total['illegal_char_count']} illegal characters were found."
+    )
     whitespace_msg = f"{cleanname_total['whitespace_count']} whitespace characters removed from filenames."
     rm_msg = f"{ds_count} .DS_Store or ._ files removed from dir before archive."
 
@@ -148,7 +131,7 @@ def check_pathname(path):
     return validation_result
 
 
-def makeSafeName(root, name):
+def make_safe_name(root, name):
     """
     Check a path name against a list of illegal characters, remove any found.
     """
@@ -174,13 +157,13 @@ def makeSafeName(root, name):
         "+",
         "=",
         "'",
-        "\"",
+        '"',
     ]
     illegal_char_count = len([x for x in name if x in illegalchars])
 
     try:
         # regex to match on:
-        # leading and trailing all whitespace 
+        # leading and trailing all whitespace
         # period preceding "/" or at the end of a path
         # remove matches and count number of subs
 
@@ -194,12 +177,10 @@ def makeSafeName(root, name):
         whitespace_count = int(cleanname_re[1])
 
         p = Path(os.path.join(root, name))
-        cleanp = Path(os.path.join(root, cleanname ))
-        
-        if p != cleanp: 
+        cleanp = Path(os.path.join(root, cleanname))
+
+        if p != cleanp:
             p.rename(cleanp)
-        else:
-            pass        
 
     except Exception as e:
         make_safe_msg = (
@@ -208,9 +189,7 @@ def makeSafeName(root, name):
         logger.error(make_safe_msg)
         cleanname = False
 
-
     if illegal_char_count > 0 or whitespace_count > 0:
-
         pathname_msg = f"\n\
         {illegal_char_count} - illegal characters removed from pathname.\n\
         {whitespace_count} - characters removed from head and tail \n\
@@ -218,12 +197,10 @@ def makeSafeName(root, name):
         clean name:  {cleanname} \n "
         logger.info(pathname_msg)
 
-    else: 
-        pass
-
-    cleanname_totals = {"illegal_char_count": illegal_char_count, "whitespace_count": whitespace_count}
-
-    return cleanname, cleanname_totals
+    return cleanname, {
+        "illegal_char_count": illegal_char_count,
+        "whitespace_count": whitespace_count,
+    }
 
 
 def move_to_archive_error(path):
@@ -233,20 +210,15 @@ def move_to_archive_error(path):
     logger.info(path_err_msg)
     return
 
-# def move_to_archive_zip(path): 
-#     req_zip_f = os.path.join(path[:28], "_Archive_REQ_ZIP")
-    # shutil.move(path, req_zip_f)
-    # path_zip_msg = f"{Path(path).name} moved to REQ_ZIP location."
-    # logger.info(path_zip_msg)
-    # return
 
 def write_path_to_txt(path, illegal_path):
     req_zip_f = os.path.join(path[:28], "_Archive_REQ_ZIP")
     os.chdir(req_zip_f)
-    with open(os.path.basename(path) + ".txt", 'a+') as f:
+    with open(os.path.basename(path) + ".txt", "a+") as f:
         f.write(illegal_path + "\n")
         f.close()
     return
+
 
 if __name__ == "__main__":
     check_pathname()
