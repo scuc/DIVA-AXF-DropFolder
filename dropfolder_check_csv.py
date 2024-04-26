@@ -51,6 +51,18 @@ def create_csv():
     if queue_status != 0:
         return
 
+    """
+    for each watch folder, create a list of directories present, check to see
+    if the same directories are not already present in _archiving and
+    _incomplete and a size larger than 0 KB.
+    """
+    index = 0
+    submission_count = 0
+    t = time.time()
+    date = time.strftime("%Y%m%d%H%M", time.localtime(t))
+    csv_doc = f"{date}_divaview.csv"
+    csv_tmp = os.path.join(script_root, "_csv_tmp")
+
     for index, dropfolder in enumerate(drop_folders):
 
         source_destination = source_dest[index]

@@ -5,12 +5,12 @@ import shutil
 from collections import Counter
 from pathlib import Path
 
-import config
+import config as cnf
 from check_obj_size import get_object_size as get_size
 
 logger = logging.getLogger(__name__)
 
-config = config.get_config()
+config = cnf.get_config()
 
 script_root = config["paths"]["script_root"]
 mac_root_folders = config["paths"]["mac_root_path"]
